@@ -143,7 +143,9 @@ typedef struct nf_engine_stats {
 NF_API int nf_device_count(int kind /* NF_INPUT / NF_OUTPUT */);
 NF_API int nf_device_get(int kind, int index, nf_device_info* info); /* 0 on success */
 
-/* in_id / out_id: nf_device_info.id, or NULL/"" for the default device. */
+/* in_id / out_id: nf_device_info.id, or NULL/"" for the default device. out_id "nf:none" records
+   without an output device (the processed audio is discarded). Error messages start with
+   "input: " or "output: " and keep the Windows HRESULT, so callers can explain the problem. */
 NF_API nf_engine* nf_engine_create(nf_pipeline* p, const char* in_id, const char* out_id, int exclusive,
                                    char* err, int err_len);
 NF_API int nf_engine_start(nf_engine* e, char* err, int err_len);

@@ -4,7 +4,8 @@ import numpy as np
 from PySide6 import QtCore, QtWidgets as W
 from ..core import FRAME_SIZE, FRAME_MS, SAMPLE_RATE
 from ..core import native
-from .. import contribute, model_update
+from .. import contribute, model_update, net
+from ..audio import errors as audio_errors
 from ..i18n import tr
 from . import autostart, icons, settings, theme
 from .spectrum_plot import SpectrumPlot
@@ -13,6 +14,7 @@ from .eq_panel import EqPanel
 from .dynamics_panel import DynamicsPanel
 from .contribute_dialog import ContributeDialog, UploadWorker
 from .about import AboutCard
+from . import mic_help
 
 LANGS = [("en", "English"), ("id", "Bahasa Indonesia")]
 LEARN_SECONDS = 3
@@ -267,6 +269,7 @@ class MainWindow(W.QMainWindow):
         self._rec_signal = _SampleSignal()
         self._rec_signal.ready.connect(self._offer_recording)
         self._rec = None                         # running "Record noise": {t0, total, temp engine}
+        self._silent_since, self._silence_warned = None, False
         self._rec_timer = QtCore.QTimer(self, interval=100, timeout=self._rec_tick)
         self._uploader = UploadWorker()
         self._uploader.done.connect(self._upload_done)
@@ -654,26 +657,59 @@ class MainWindow(W.QMainWindow):
             for i in range(self.out_cb.count()):
                 if "cable input" in self.out_cb.itemText(i).lower(): self.out_cb.setCurrentIndex(i); break
 
-    def _make_engine(self):
+    def _make_engine(self, record_only: bool = False, exclusive: bool | None = None):
+        """record_only: open the microphone alone (no output device), for "Record noise"."""
+        excl = (self.excl.isChecked() and not record_only) if exclusive is None else exclusive
         if self.native_engine:
-            return native.NativeEngine(self.pipe, self.in_cb.currentData(),
-                                       self.out_cb.currentData(), exclusive=self.excl.isChecked())
-        from ..audio.engine import Engine
-        return Engine(self.pipe, self.in_cb.currentData(), self.out_cb.currentData(),
-                      exclusive=self.excl.isChecked())
+            out = native.NativeEngine.NO_OUTPUT if record_only else self.out_cb.currentData()
+            return native.NativeEngine(self.pipe, self.in_cb.currentData(), out, exclusive=excl)
+        from ..audio.engine import Engine, NO_OUTPUT
+        return Engine(self.pipe, self.in_cb.currentData(), NO_OUTPUT if record_only else self.out_cb.currentData(),
+                      exclusive=excl)
+
+    def _start_engine(self, record_only: bool = False):
+        """Create and start an engine. If exclusive mode fails, retry once in shared mode."""
+        def attempt(**kw):
+            eng = self._make_engine(record_only=record_only, **kw)
+            try:
+                eng.start()
+            except Exception:
+                try:
+                    eng.stop()
+                except Exception:
+                    pass
+                raise
+            return eng
+        try:
+            eng = attempt()
+        except Exception as e:
+            err = audio_errors.classify(e)
+            if record_only or not self.excl.isChecked() or err.reason in ("denied", "not_found"):
+                raise
+            eng = attempt(exclusive=False)
+            self.status.setText(tr("mic.exclusive_fallback", self.lang))
+        self._silent_since, self._silence_warned = None, False
+        return eng
+
+    def _audio_error(self, e) -> None:
+        """Explain why the microphone / output could not be used, with a button to the right Settings page."""
+        err = e if isinstance(e, audio_errors.AudioError) else audio_errors.classify(e)
+        text = mic_help.short(err, self.lang)
+        self.status.setText(text)
+        if self.isVisible():
+            mic_help.show(self, err, self.lang)
+        elif self.tray.isVisible():                     # running hidden (started at sign-in)
+            self.tray.showMessage(tr("app.title", self.lang), text, W.QSystemTrayIcon.Warning)
 
     def toggle_engine(self, on: bool):
         t = lambda k: tr(k, self.lang)
         if on:
             try:
-                self.engine = self._make_engine()
-                self.engine.start()
+                self.engine = self._start_engine()
             except Exception as e:
                 self.start_btn.blockSignals(True); self.start_btn.setChecked(False); self.start_btn.blockSignals(False)
                 self.engine = None
-                self.status.setText(f"{t('engine.error')}: {e}")
-                if not self.isVisible() and self.tray.isVisible():   # started hidden at sign-in
-                    self.tray.showMessage(t("app.title"), f"{t('engine.error')}: {e}", W.QSystemTrayIcon.Warning)
+                self._audio_error(e)
                 on = None   # failed: keep the remembered on/off state (e.g. USB mic not plugged in yet)
         else:
             if self.engine: self.engine.stop(); self.engine = None
@@ -735,11 +771,11 @@ class MainWindow(W.QMainWindow):
                 self._file_failed(t("contrib.record_nomic"))
                 return
             try:
-                temp = self._make_engine()
-                temp.start()
+                temp = self._start_engine(record_only=True)   # the microphone only: no VB-Cable needed
             except Exception as e:
-                self._file_failed(f"{t('contrib.record_nomic')} ({e})")
+                self._audio_error(e)
                 return
+            self.start_btn.setEnabled(False)                  # one engine at a time on this pipeline
         total = contribute.TRIM_START + contribute.RECORD_SECONDS
         self._rec = {"t0": time.monotonic(), "total": total, "temp": temp}
         self.pipe.capture_start(int(total * SAMPLE_RATE))
@@ -765,6 +801,7 @@ class MainWindow(W.QMainWindow):
         raw, dropped = self.pipe.capture_stop()
         if r and r["temp"] is not None:
             r["temp"].stop()
+            self.start_btn.setEnabled(not self.demo)
         self.learn_btn.setEnabled(True)
         self.retranslate()
         if cancel:
@@ -781,6 +818,9 @@ class MainWindow(W.QMainWindow):
         self.contrib_rec.setEnabled(True)
         self.status.setText("")
         t = lambda k: tr(k, self.lang)
+        if sample is None and reason == "mic_silent":
+            self._audio_error(audio_errors.AudioError("silent", "input", ""))
+            return
         if sample is None:
             W.QMessageBox.information(self, t("contrib.title"),
                                       t("contrib.record_none").format(reason=t(f"contrib.reason.{reason}")))
@@ -841,10 +881,21 @@ class MainWindow(W.QMainWindow):
                                   tr("contrib.delete_confirm", self.lang)) == W.QMessageBox.Yes:
             self._uploader.run(contribute.delete_my_samples)
 
-    def _upload_done(self, ok, msg):
+    def _upload_done(self, ok, msg, reason=""):
         self.retranslate()
-        self.status.setText(tr("contrib.thanks" if ok else "contrib.failed", self.lang)
-                            + ("" if ok else f": {msg}"))
+        t = lambda k: tr(k, self.lang)
+        if ok:
+            self.status.setText(t("contrib.thanks"))
+            return
+        why = t(f"contrib.err.{reason}") if reason in net.REASONS else msg
+        if reason == "rejected":
+            why = f"{why}: {msg}"
+        self.status.setText(f"{t('contrib.failed')}: {why}")
+        box = W.QMessageBox(W.QMessageBox.Warning, t("contrib.title"), f"{t('contrib.failed')}.\n\n{why}",
+                            W.QMessageBox.Close, self)
+        if msg and msg != why:
+            box.setDetailedText(msg)
+        box.exec()
 
     def _demo_frame(self):
         """No audio device (e.g. headless): feed a synthetic 'voice + noise' signal."""
@@ -867,6 +918,7 @@ class MainWindow(W.QMainWindow):
         elif self.tabs.currentIndex() == 2 and hasattr(p, "dynamics_gr_db"):
             self.dyn_panel.set_meters(p.in_analyzer.level_db(), *p.dynamics_gr_db())
         self.meter.setLevel(p.out_analyzer.level_db())
+        self._watch_silence(p)
         st = self.stat_lbls
         st["engine"].setText(tr("engine.backend", self.lang).format(name="C++" if self.native else "Python"))
         stats = {}
@@ -882,6 +934,22 @@ class MainWindow(W.QMainWindow):
             stats = {"dsp": f"DSP: {getattr(self, '_cost', 0):.2f} ms / {FRAME_MS:.0f} ms"}
         for (k, lbl), sep in zip(list(st.items())[1:], self.stat_seps[1:]):
             lbl.setText(stats.get(k, "")); lbl.setVisible(k in stats); sep.setVisible(k in stats)
+
+    def _watch_silence(self, p):
+        """Windows feeds exact zeros when the microphone is muted or blocked; say so once per start."""
+        running = self.engine is not None or bool(self._rec and self._rec.get("temp"))
+        if self.demo or not running:
+            self._silent_since = None
+            return
+        if not audio_errors.is_silent(p.in_analyzer.level_db()):
+            self._silent_since = None
+            return
+        now = time.monotonic()
+        if self._silent_since is None:
+            self._silent_since = now
+        elif now - self._silent_since > 4.0 and not self._silence_warned and not self._rec:
+            self._silence_warned = True        # during "Record noise" the result dialog explains it
+            self._audio_error(audio_errors.AudioError("silent", "input", ""))
 
     def closeEvent(self, e):
         if not self._quitting and self.tray_cb.isChecked() and self.tray.isVisible():

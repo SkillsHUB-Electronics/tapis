@@ -169,7 +169,7 @@ def test_record_noise_flow(tmp_path, monkeypatch):
         def start(self): events.append("start")
         def stop(self): events.append("stop")
     w.in_cb.addItem("Mic", 1)
-    monkeypatch.setattr(w, "_make_engine", lambda: FakeEngine())
+    monkeypatch.setattr(w, "_make_engine", lambda **kw: FakeEngine())
     room = np.tile(np.random.default_rng(1).standard_normal(48000).astype(np.float32) * 0.02, 11)
     got = []
     from types import SimpleNamespace

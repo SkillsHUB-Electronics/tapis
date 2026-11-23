@@ -157,20 +157,26 @@ def check_sample(x: np.ndarray, model_path: str | None = None) -> tuple[bool, st
     return True, "ok"
 
 
+MAX_DROPPED_FRAMES = 5     # a few missing 10 ms frames (busy PC) do not spoil a noise recording
+
+
 def prepare_with_reason(raw: np.ndarray, dropped: int = 0,
                         max_seconds: float = MAX_SECONDS) -> tuple[np.ndarray | None, str]:
     """Trim the start and cap the length of a microphone recording.
-    Returns (samples, "ok") or (None, reason) where reason is a check_sample reason or "gaps"."""
-    if dropped:
+    Returns (samples, "ok") or (None, reason) where reason is a check_sample reason, "gaps"
+    or "mic_silent" (only exact zeros: the microphone is muted or blocked by Windows)."""
+    if dropped > MAX_DROPPED_FRAMES:
         return None, "gaps"                      # the recording has gaps
     x = np.asarray(raw, np.float32)[int(TRIM_START * SR):int((TRIM_START + max_seconds) * SR)]
+    if len(x) >= MIN_SECONDS * SR and not np.any(x):
+        return None, "mic_silent"
     ok, reason = check_sample(x)
     return (x, "ok") if ok else (None, reason)
 
 
 def prepare(raw: np.ndarray, dropped: int = 0) -> np.ndarray | None:
     """Trim the start and cap the length of a 'Learn noise' recording; None if unusable."""
-    if dropped:
+    if dropped > MAX_DROPPED_FRAMES:
         return None
     x = np.asarray(raw, np.float32)[int(TRIM_START * SR):int(MAX_SECONDS * SR)]
     ok, _ = check_sample(x)
@@ -327,9 +333,11 @@ def _os() -> str:
     return {"Windows": "windows", "Linux": "linux", "Darwin": "macos"}.get(platform.system(), "linux")
 
 
-def upload(x: np.ndarray, category: str, timeout: float = 20.0, source: str = "mic") -> str:
-    """Send one approved sample. Returns the sample id; raises on any failure."""
+def upload(x: np.ndarray, category: str, timeout: float = 45.0, source: str = "mic") -> str:
+    """Send one approved sample. Returns the sample id; raises on any failure (net.NetError for
+    network problems, with a reason the UI can explain)."""
     import urllib.request
+    from . import net
     if not enabled():
         raise RuntimeError("sample upload is not configured")
     if category not in CATEGORIES:
@@ -342,15 +350,14 @@ def upload(x: np.ndarray, category: str, timeout: float = 20.0, source: str = "m
         SAMPLES_URL.rstrip("/") + "/v1/samples", data=encode_wav(x), method="POST",
         headers={"Content-Type": "audio/wav", "X-NF-Meta": json.dumps(meta),
                  "User-Agent": f"Tapis/{__version__}"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        res = json.loads(r.read(64 * 1024))
+    res = json.loads(net.request(req, timeout))
     if not res.get("ok"):
-        raise RuntimeError(res.get("error", "upload failed"))
+        raise net.NetError("rejected", res.get("error", "upload failed"))
     save_state(sent=int(load_state().get("sent", 0)) + 1)
     return res["id"]
 
 
-def upload_clips(clips: list[np.ndarray], category: str, timeout: float = 20.0) -> int:
+def upload_clips(clips: list[np.ndarray], category: str, timeout: float = 45.0) -> int:
     """Send the clips of one audio file (source "file"). Returns how many were sent; raises if none."""
     sent, error = 0, None
     for c in clips:
@@ -364,15 +371,15 @@ def upload_clips(clips: list[np.ndarray], category: str, timeout: float = 20.0) 
     return sent
 
 
-def delete_my_samples(timeout: float = 20.0) -> int:
+def delete_my_samples(timeout: float = 45.0) -> int:
     """Ask the service to delete every sample sent from this installation. Returns how many."""
     import urllib.request
+    from . import net
     if not enabled():
         raise RuntimeError("sample upload is not configured")
     req = urllib.request.Request(
         f"{SAMPLES_URL.rstrip('/')}/v1/samples?install_id={install_id()}", method="DELETE",
         headers={"User-Agent": f"Tapis/{__version__}"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        res = json.loads(r.read(64 * 1024))
+    res = json.loads(net.request(req, timeout))
     save_state(sent=0)
     return int(res.get("deleted", 0))

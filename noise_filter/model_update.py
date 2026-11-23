@@ -83,8 +83,8 @@ def _get(url: str, timeout: float, limit: int) -> bytes:
     if not url.startswith(ALLOWED_PREFIXES):
         raise ValueError(f"refusing to download from {url}")
     req = urllib.request.Request(url, headers={"User-Agent": f"Tapis/{__version__}"})
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        data = r.read(limit + 1)
+    from . import net
+    data = net.request(req, timeout, limit + 1, retries=0)
     if len(data) > limit:
         raise ValueError("download too large")
     return data

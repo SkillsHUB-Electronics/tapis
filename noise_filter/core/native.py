@@ -318,7 +318,10 @@ class NativeEngine:
     """C++ WASAPI engine: capture, filter and render all happen on a native MMCSS thread,
     so Python's GIL and garbage collector never touch the audio path."""
 
+    NO_OUTPUT = "nf:none"     # out_id for recording only: the processed audio is discarded
+
     def __init__(self, pipeline: NativePipeline, in_id: str | None, out_id: str | None, exclusive: bool = False):
+        """in_id / out_id: device ids, None or "" for the default device, out_id NO_OUTPUT for none."""
         self._lib, self.pipe = pipeline._lib, pipeline
         err = C.create_string_buffer(512)
         self._h = self._lib.nf_engine_create(pipeline.handle, (in_id or "").encode(), (out_id or "").encode(),
