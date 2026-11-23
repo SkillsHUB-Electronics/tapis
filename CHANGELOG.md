@@ -1,11 +1,27 @@
 # Changelog
 
-All notable changes to Noise Filter are listed here. The format follows
+All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/). Downloads and full release notes are on the
-[releases page](https://github.com/SkillsHUB-Electronics/Noise-Filter/releases).
+[releases page](https://github.com/SkillsHUB-Electronics/tapis/releases).
 
 ## [Unreleased]
+
+## [0.11.0] - 2026-11-23
+
+### Changed
+- **New name: Tapis.** *Tapis* is Javanese for a sieve or filter. The window, tray, installer
+  (`Tapis-Setup-<version>.exe`), program (`Tapis.exe`), Start menu and documents use the new name.
+- The command-line companion is now `tapisctl` (was `nfctl`); the MCP server is named `tapis`.
+  Re-run `tapisctl mcp-config` and paste the new entry into your AI app.
+- The repository moved to [github.com/SkillsHUB-Electronics/tapis](https://github.com/SkillsHUB-Electronics/tapis);
+  old links redirect.
+
+### Updating from Noise Filter
+- Run the new setup: it replaces the old installation, moves it to `C:\Program Files\Tapis`,
+  removes the old shortcuts and keeps "Start with Windows" on if it was on.
+- Settings, downloaded AI models and your sample-sharing ID move from `%APPDATA%\NoiseFilter` to
+  `%APPDATA%\Tapis` the first time Tapis starts.
 
 ## [0.10.0] - 2026-11-14
 
@@ -107,16 +123,17 @@ All notable changes to Noise Filter are listed here. The format follows
 - Offline Windows installer with VB-CABLE bundled.
 - App icon.
 
-[Unreleased]: https://github.com/SkillsHUB-Electronics/Noise-Filter/compare/v0.10.0...HEAD
-[0.10.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.10.0
-[0.9.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.9.0
-[0.8.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.8.0
-[0.7.1]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.7.1
-[0.7.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.7.0
-[0.6.1]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.6.1
-[0.6.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.6.0
-[0.5.1]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.5.1
-[0.5.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.5.0
-[0.4.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.4.0
-[0.3.0]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.3.0
-[0.2.0-beta.1]: https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/tag/v0.2.0-beta.1
+[Unreleased]: https://github.com/SkillsHUB-Electronics/tapis/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.0
+[0.10.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.10.0
+[0.9.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.9.0
+[0.8.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.8.0
+[0.7.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.7.1
+[0.7.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.7.0
+[0.6.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.6.1
+[0.6.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.6.0
+[0.5.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.5.1
+[0.5.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.5.0
+[0.4.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.4.0
+[0.3.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.3.0
+[0.2.0-beta.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.2.0-beta.1

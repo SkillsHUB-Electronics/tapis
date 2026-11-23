@@ -1,12 +1,11 @@
 import json
-import os
 from pathlib import Path
 from ..core import PipelineConfig
+from ..paths import data_dir
 
 
 def config_path() -> Path:
-    base = os.environ.get("APPDATA") or str(Path.home() / ".config")
-    return Path(base) / "NoiseFilter" / "config.json"
+    return data_dir() / "config.json"
 
 
 def load() -> dict:

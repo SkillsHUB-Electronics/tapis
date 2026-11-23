@@ -32,7 +32,7 @@ def main() -> int:
 
     pg.setConfigOptions(antialias=True)
     app = W.QApplication.instance() or W.QApplication(sys.argv)
-    app.setApplicationName("Noise Filter")
+    app.setApplicationName("Tapis")
     from noise_filter.ui import theme
     from noise_filter.ui.app import app_icon
     from PySide6 import QtGui

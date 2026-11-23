@@ -6,8 +6,8 @@
    with today's date, and add the compare link at the bottom.
 3. **Merge** the pull request into the default branch. CI must be green.
 4. **Publish a GitHub release** with tag `vX.Y.Z` on the default branch, title
-   `Noise Filter vX.Y.Z`, and the changelog section as the notes (in English).
-5. CI (`ci.yml`, `release: published`) builds `NoiseFilter-Setup-X.Y.Z.exe` and attaches it to the
+   `Tapis vX.Y.Z`, and the changelog section as the notes (in English).
+5. CI (`ci.yml`, `release: published`) builds `Tapis-Setup-X.Y.Z.exe` and attaches it to the
    release, usually within about 15 minutes. Check that the file is there.
 
 AI model updates do not need an app release: the weekly training workflow publishes new models

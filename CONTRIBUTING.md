@@ -1,13 +1,13 @@
-# Contributing to Noise Filter
+# Contributing to Tapis
 
 Thanks for helping make voices clearer. Bug reports, ideas, documentation fixes and code are all
 welcome. Issues may be written in English or Bahasa Indonesia; code, comments and docs are in English.
 
 ## Ways to help
 
-- **Report a bug** with the [bug report form](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues/new?template=bug_report.yml).
-  Include the version (Settings › About), Windows version, devices, and `nfctl status` output.
-- **Suggest a feature** with the [feature request form](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues/new?template=feature_request.yml).
+- **Report a bug** with the [bug report form](https://github.com/SkillsHUB-Electronics/tapis/issues/new?template=bug_report.yml).
+  Include the version (Settings › About), Windows version, devices, and `tapisctl status` output.
+- **Suggest a feature** with the [feature request form](https://github.com/SkillsHUB-Electronics/tapis/issues/new?template=feature_request.yml).
 - **Share room noise** from the app (Settings › *Send a noise file…*). It directly improves the AI model.
 - **Send a pull request** for an open issue, or open an issue first for anything larger than a small fix.
 
@@ -16,11 +16,11 @@ Security problems go through [SECURITY.md](SECURITY.md), not public issues.
 ## Development setup
 
 ```powershell
-git clone https://github.com/SkillsHUB-Electronics/Noise-Filter
-cd Noise-Filter
+git clone https://github.com/SkillsHUB-Electronics/tapis
+cd tapis
 pip install -e .[audio,ai,ui,dev]
 pytest
-noise-filter ui --demo
+tapis ui --demo
 ```
 
 Building the C++ core and the installer: [docs/building.md](docs/building.md).

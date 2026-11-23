@@ -2,7 +2,7 @@
 
 Where models live
   - bundled:    noise_filter/models/manifest.json + nfnet-<version>.onnx (ships in the installer, works offline)
-  - downloaded: %APPDATA%/NoiseFilter/models/ (newer models fetched by the update check)
+  - downloaded: %APPDATA%/Tapis/models/ (newer models fetched by the update check)
 
 Update check
   The app reads manifest.json from the repository's default branch over HTTPS. If it lists a newer
@@ -26,7 +26,7 @@ from . import __version__
 
 MANIFEST_URL = os.environ.get(
     "NF_MODEL_MANIFEST_URL",
-    "https://raw.githubusercontent.com/SkillsHUB-Electronics/Noise-Filter/HEAD/noise_filter/models/manifest.json")
+    "https://raw.githubusercontent.com/SkillsHUB-Electronics/tapis/HEAD/noise_filter/models/manifest.json")
 ALLOWED_PREFIXES = ("https://raw.githubusercontent.com/SkillsHUB-Electronics/",
                     "https://github.com/SkillsHUB-Electronics/")
 MAX_MODEL_BYTES = 50 * 1024 * 1024
@@ -40,8 +40,8 @@ def _ver(v: str) -> tuple:
 
 
 def user_models_dir() -> Path:
-    base = os.environ.get("APPDATA") or str(Path.home() / ".config")
-    return Path(base) / "NoiseFilter" / "models"
+    from .paths import data_dir
+    return data_dir() / "models"
 
 
 def _read_manifest(path: Path) -> dict | None:
@@ -82,7 +82,7 @@ def current_model_path() -> str:
 def _get(url: str, timeout: float, limit: int) -> bytes:
     if not url.startswith(ALLOWED_PREFIXES):
         raise ValueError(f"refusing to download from {url}")
-    req = urllib.request.Request(url, headers={"User-Agent": f"NoiseFilter/{__version__}"})
+    req = urllib.request.Request(url, headers={"User-Agent": f"Tapis/{__version__}"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         data = r.read(limit + 1)
     if len(data) > limit:

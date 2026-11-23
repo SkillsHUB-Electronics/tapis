@@ -1,6 +1,6 @@
 # nf-core (C++)
 
-Realtime core of Noise Filter: a 1:1 C++17 port of `noise_filter/core` plus a native
+Realtime core of Tapis: a 1:1 C++17 port of `noise_filter/core` plus a native
 Windows (WASAPI) audio engine, behind a small C API (`include/nf/nf.h`). The same
 library will be used by the desktop app now and by the Android/iOS apps later.
 
@@ -26,7 +26,7 @@ cmake --build cpp/build --config Release
 ctest --test-dir cpp/build -C Release
 cmake --install cpp/build --config Release     # copies nf_core.dll + nf-cli.exe to noise_filter/_native/
 ```
-After the install step, `noise-filter ui` uses the C++ engine automatically (the status bar
+After the install step, `tapis ui` uses the C++ engine automatically (the status bar
 shows "Engine: C++"). Delete `noise_filter/_native/` or set `NF_CORE_DISABLE=1` to go back
 to the Python engine.
 

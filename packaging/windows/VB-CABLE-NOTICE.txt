@@ -1,7 +1,7 @@
 VB-CABLE Virtual Audio Device
 =============================
 This installer includes VB-CABLE, a virtual audio cable made by VB-Audio Software
-(https://www.vb-cable.com). Noise Filter sends the cleaned microphone sound to
+(https://www.vb-cable.com). Tapis sends the cleaned microphone sound to
 "CABLE Input"; other apps (Zoom, Meet, TeamTalk) then use "CABLE Output" as their microphone.
 
 VB-CABLE is a donationware, all participations are welcome.

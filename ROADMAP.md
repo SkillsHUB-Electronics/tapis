@@ -1,8 +1,8 @@
 # Roadmap
 
-Noise Filter is in **beta**. The Windows PC app is the focus; this page says what is done, what
+Tapis is in **beta**. The Windows PC app is the focus; this page says what is done, what
 is being considered, and what is on hold. It is a plan, not a promise: priorities follow user
-feedback, so open an [issue](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues/new/choose)
+feedback, so open an [issue](https://github.com/SkillsHUB-Electronics/tapis/issues/new/choose)
 if something here matters to you.
 
 ## Done
@@ -14,7 +14,7 @@ if something here matters to you.
 | F3 | Opt-in noise samples: Cloudflare Worker + R2, on-device voice check, human review | 0.4.0 – 0.6.1 |
 | F5 (part) | Weekly automatic retraining with accepted samples, quality gate before shipping | 0.4.0 |
 | PC app | Tray, start with Windows, parametric EQ, compressor and limiter | 0.5.x |
-| PC app | `nfctl` command line and MCP server | 0.7.0 |
+| PC app | `tapisctl` command line and MCP server | 0.7.0 |
 | PC app | New design with light/dark themes, About, privacy policy, MIT license | 0.8.0 – 0.9.0 |
 | PC app | Vocal/singing mode that keeps harmonics, dry/wet Mix | 0.10.0 |
 

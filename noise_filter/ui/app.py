@@ -16,7 +16,7 @@ def app_icon(QtGui):
 
 
 def _ask_running_instance(name: str, show: bool = True) -> bool:
-    """True when another Noise Filter is already open; it is asked to show its window."""
+    """True when another Tapis is already open; it is asked to show its window."""
     from PySide6.QtNetwork import QLocalSocket
     sock = QLocalSocket()
     sock.connectToServer(name)
@@ -35,9 +35,9 @@ def run(demo: bool = False, minimized: bool = False) -> int:
     from PySide6 import QtGui
     if sys.platform == "win32":   # own taskbar icon instead of python.exe's
         import ctypes
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("SkillsHUB.NoiseFilter")
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("SkillsHUB.Tapis")
     app = W.QApplication.instance() or W.QApplication(sys.argv)
-    app.setApplicationName("Noise Filter")
+    app.setApplicationName("Tapis")
     app.setWindowIcon(app_icon(QtGui))
     app.setQuitOnLastWindowClosed(False)   # closing to the tray keeps the filter running
     import os
@@ -48,7 +48,7 @@ def run(demo: bool = False, minimized: bool = False) -> int:
     from .main_window import MainWindow
     from .control_server import listen
     w = MainWindow(demo=demo)
-    # local control channel for `noise-filter ctl` / the MCP server (a demo window only for tests)
+    # local control channel for `tapis ctl` / the MCP server (a demo window only for tests)
     server = listen(name, w) if not demo or os.environ.get("NF_CONTROL_NAME") else None   # noqa: F841 (kept alive)
     if minimized and w.tray.isVisible():
         pass                               # start-up with Windows: stay in the tray

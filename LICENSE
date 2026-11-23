@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 -------------------------------------------------------------------------------
-The MIT License above covers the Noise Filter source code. Two parts are not
+The MIT License above covers the Tapis source code. Two parts are not
 covered by it:
 
   * The bundled AI model files (noise_filter/models/*.onnx) are trained on data

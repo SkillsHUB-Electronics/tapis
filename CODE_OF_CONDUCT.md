@@ -1,6 +1,6 @@
 # Code of conduct
 
-Noise Filter is built by and for people who just want to be heard clearly. We want taking part in
+Tapis is built by and for people who just want to be heard clearly. We want taking part in
 this project to feel the same way: respectful, welcoming and focused on the work.
 
 ## What we expect
@@ -21,7 +21,7 @@ and other channels where you represent the project).
 ## Reporting
 
 Report a problem to the maintainers through a
-[private security advisory](https://github.com/SkillsHUB-Electronics/Noise-Filter/security/advisories/new)
+[private security advisory](https://github.com/SkillsHUB-Electronics/tapis/security/advisories/new)
 (choose it even though it is not a security issue) or by contacting the repository owner on GitHub.
 Reports are handled confidentially.
 

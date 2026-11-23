@@ -29,7 +29,7 @@ def test_window_demo_and_live_params(tmp_path, monkeypatch):
     w.lang_cb.setCurrentIndex(1)
     assert w.start_btn.text() == "Mulai"
     w.close()
-    assert (tmp_path / "NoiseFilter" / "config.json").exists()
+    assert (tmp_path / "Tapis" / "config.json").exists()
 
 
 def test_ai_mode_uses_installed_model(tmp_path, monkeypatch):
@@ -244,7 +244,7 @@ def test_close_to_tray_and_quit(tmp_path, monkeypatch):
     w.close()
     assert quits and w._shut_down and not w.tray.isVisible()
     import json
-    data = json.loads((tmp_path / "NoiseFilter" / "config.json").read_text("utf-8"))
+    data = json.loads((tmp_path / "Tapis" / "config.json").read_text("utf-8"))
     assert data["close_to_tray"] is False and data["geometry"]
 
 
@@ -329,13 +329,19 @@ def test_autostart_registry_value(monkeypatch):
     monkeypatch.setattr(autostart, "supported", lambda: True)
     monkeypatch.setattr(autostart, "_winreg", lambda: fake)
     monkeypatch.setattr(sys, "frozen", True, raising=False)
-    monkeypatch.setattr(sys, "executable", r"C:\Program Files\Noise Filter\NoiseFilter.exe")
+    monkeypatch.setattr(sys, "executable", r"C:\Program Files\Tapis\Tapis.exe")
     assert not autostart.is_enabled()
     autostart.set_enabled(True)
     assert autostart.is_enabled()
-    assert store["NoiseFilter"] == r'"C:\Program Files\Noise Filter\NoiseFilter.exe" ui --minimized'
+    assert store["Tapis"] == r'"C:\Program Files\Tapis\Tapis.exe" ui --minimized'
     autostart.set_enabled(False); autostart.set_enabled(False)
     assert not autostart.is_enabled()
+    # an entry from the old "Noise Filter" name counts as on and is moved to the new name
+    store["NoiseFilter"] = r'"C:\Program Files\Noise Filter\NoiseFilter.exe" ui --minimized'
+    assert autostart.is_enabled()
+    autostart.refresh()
+    assert "NoiseFilter" not in store
+    assert store["Tapis"] == r'"C:\Program Files\Tapis\Tapis.exe" ui --minimized'
 
 
 def test_eq_tab_edits_reach_pipeline_and_persist(tmp_path, monkeypatch):
@@ -502,3 +508,19 @@ def test_eq_band_lock(tmp_path, monkeypatch):
     p2.table.cellWidget(0, 2).setValue(600)
     assert w2.pipe.cfg.eq_bands[0]["freq"] == 600 and "locked" not in w2.pipe.cfg.eq_bands[0]
     w2.close()
+
+
+def test_old_noisefilter_data_folder_moves_to_tapis(tmp_path, monkeypatch):
+    """Settings, models and the sample-sharing ID from the old "Noise Filter" name survive the rename."""
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    old = tmp_path / "NoiseFilter"
+    (old / "models").mkdir(parents=True)
+    (old / "config.json").write_text('{"strength": 1.4}', "utf-8")
+    (old / "contribute.json").write_text('{"install_id": "abc"}', "utf-8")
+    from noise_filter import contribute, model_update, paths
+    from noise_filter.ui import settings
+    assert settings.load() == {"strength": 1.4}
+    assert not old.exists() and paths.data_dir() == tmp_path / "Tapis"
+    assert contribute._state_path().read_text("utf-8") == '{"install_id": "abc"}'
+    assert model_update.user_models_dir() == tmp_path / "Tapis" / "models"
+    assert model_update.user_models_dir().is_dir()

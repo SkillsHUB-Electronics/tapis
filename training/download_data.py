@@ -36,7 +36,7 @@ def fetch(url: str, dest: Path) -> Path:
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(".part")
     print(f"download {url}", flush=True)
-    req = urllib.request.Request(url, headers={"User-Agent": "noise-filter-training"})
+    req = urllib.request.Request(url, headers={"User-Agent": "tapis-training"})
     with urllib.request.urlopen(req, timeout=120) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, 1 << 20)
     tmp.rename(dest)

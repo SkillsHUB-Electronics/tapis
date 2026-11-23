@@ -12,7 +12,7 @@
 
 ```powershell
 pip install -e .[audio,ai,ui]
-noise-filter ui                  # add --demo for a synthetic signal (no audio device needed)
+tapis ui                         # add --demo for a synthetic signal (no audio device needed)
 ```
 
 Extras: `audio` = sounddevice, `ai` = ONNX Runtime, `ui` = PySide6 + pyqtgraph, `dev` = pytest + scipy.
@@ -50,7 +50,7 @@ pyinstaller packaging/windows/noise_filter.spec
 iscc /DAppVersion=0.10.0 packaging/windows/installer.iss
 ```
 
-The result is `dist/NoiseFilter-Setup-<version>.exe`. CI builds the same file on every push and
+The result is `dist/Tapis-Setup-<version>.exe`. CI builds the same file on every push and
 attaches it to a GitHub release when one is published.
 
 ## Regenerate the README screenshots

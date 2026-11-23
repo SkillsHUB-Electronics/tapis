@@ -23,13 +23,13 @@ a = Analysis(
     noarchive=False,
 )
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="NoiseFilter", console=False,
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="Tapis", console=False,
           icon=str(root / "noise_filter" / "assets" / "icon.ico"), version=None)
 
-# nfctl.exe: the same package as a console program, so terminals, scripts and AI agents can control the
-# running app (`nfctl status`, `nfctl start`, `nfctl mcp` for MCP clients). It needs no Qt.
+# tapisctl.exe: the same package as a console program, so terminals, scripts and AI agents can control the
+# running app (`tapisctl status`, `tapisctl start`, `tapisctl mcp` for MCP clients). It needs no Qt.
 b = Analysis(
-    [str(root / "packaging" / "windows" / "nfctl.py")],
+    [str(root / "packaging" / "windows" / "tapisctl.py")],
     pathex=[str(root)],
     hiddenimports=["noise_filter.ctl", "noise_filter.remote", "noise_filter.mcp_server"],
     excludes=["tkinter", "matplotlib", "scipy", "pytest", "PySide6", "pyqtgraph", "onnxruntime", "torch",
@@ -37,6 +37,6 @@ b = Analysis(
     noarchive=False,
 )
 pyz_b = PYZ(b.pure)
-exe_b = EXE(pyz_b, b.scripts, [], exclude_binaries=True, name="nfctl", console=True,
+exe_b = EXE(pyz_b, b.scripts, [], exclude_binaries=True, name="tapisctl", console=True,
             icon=str(root / "noise_filter" / "assets" / "icon.ico"), version=None)
-coll = COLLECT(exe, exe_b, a.binaries, a.datas, b.binaries, b.datas, name="NoiseFilter")
+coll = COLLECT(exe, exe_b, a.binaries, a.datas, b.binaries, b.datas, name="Tapis")

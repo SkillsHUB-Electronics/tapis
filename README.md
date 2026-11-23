@@ -1,34 +1,35 @@
 <p align="center">
-  <img src="noise_filter/assets/icon.png" width="128" height="128" alt="Noise Filter icon: a blue sound wave on a dark rounded tile">
+  <img src="noise_filter/assets/icon.png" width="128" height="128" alt="Tapis icon: a blue sound wave on a dark rounded tile">
 </p>
 
-<h1 align="center">Noise Filter</h1>
+<h1 align="center">Tapis</h1>
 
 <p align="center">
   <b>Real-time microphone noise removal for Windows, with a live spectrum, an equalizer and an AI denoiser.</b>
 </p>
 
 <p align="center">
-  Noise Filter sits between your microphone and your meeting app. It removes fans, air conditioning,
+  Tapis sits between your microphone and your meeting app. It removes fans, air conditioning,
   traffic and mains hum in 10 ms frames, then passes the clean voice to a virtual
   microphone that Teams, Meet, Zoom, Discord, TeamTalk or OBS can pick like any other mic.<br>
-  <i>By SkillsHUB Electronics.</i>
+  <i><b>Tapis</b> is Javanese for a sieve: it lets your voice through and holds the noise back.
+  Formerly called Noise Filter. By SkillsHUB Electronics.</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/SkillsHUB-Electronics/Noise-Filter?style=flat-square&color=1f6feb&label=release"></a>
-  <a href="https://github.com/SkillsHUB-Electronics/Noise-Filter/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SkillsHUB-Electronics/Noise-Filter/ci.yml?style=flat-square&label=CI"></a>
+  <a href="https://github.com/SkillsHUB-Electronics/tapis/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/SkillsHUB-Electronics/tapis?style=flat-square&color=1f6feb&label=release"></a>
+  <a href="https://github.com/SkillsHUB-Electronics/tapis/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/SkillsHUB-Electronics/tapis/ci.yml?style=flat-square&label=CI"></a>
   <img alt="Runs on Windows 10 and 11" src="https://img.shields.io/badge/runs%20on-Windows%2010%20%C2%B7%2011-0f62c9?style=flat-square&logo=windows&logoColor=white">
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-1f6feb?style=flat-square"></a>
   <br>
   <img alt="Written in Python and C++" src="https://img.shields.io/badge/written%20in-Python%20%C2%B7%20C%2B%2B17-0f62c9?style=flat-square&logo=python&logoColor=white">
   <img alt="10 ms frames at 48 kHz" src="https://img.shields.io/badge/latency-10%20ms%20frames%20%40%2048%20kHz-1f6feb?style=flat-square">
   <img alt="Controllable by CLI and MCP" src="https://img.shields.io/badge/agents-CLI%20%C2%B7%20MCP-0f62c9?style=flat-square">
-  <a href="https://github.com/SkillsHUB-Electronics/Noise-Filter/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/SkillsHUB-Electronics/Noise-Filter/total?style=flat-square&color=1f6feb"></a>
+  <a href="https://github.com/SkillsHUB-Electronics/tapis/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/SkillsHUB-Electronics/tapis/total?style=flat-square&color=1f6feb"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/latest"><img alt="Download for Windows" src="https://img.shields.io/badge/Download%20for%20Windows-0f62c9?style=for-the-badge&logo=windows&logoColor=white" height="40"></a>
+  <a href="https://github.com/SkillsHUB-Electronics/tapis/releases/latest"><img alt="Download for Windows" src="https://img.shields.io/badge/Download%20for%20Windows-0f62c9?style=for-the-badge&logo=windows&logoColor=white" height="40"></a>
 </p>
 
 <br>
@@ -36,14 +37,14 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/images/hero-dark.png">
-    <img src="docs/images/hero.png" alt="The Noise Filter window on the Filter and Spectrum tab. A USB microphone feeds the VB-Audio virtual cable. The blue input spectrum on the left shows a voice with broadband noise and a hum peak; the green output spectrum on the right shows the same voice with the noise floor pushed down. Below are the denoise mode, strength, high-pass, gate and output gain sliders, and the status bar reads Running, Engine: Python, DSP 0.86 ms per 10 ms frame." width="100%">
+    <img src="docs/images/hero.png" alt="The Tapis window on the Filter and Spectrum tab. A USB microphone feeds the VB-Audio virtual cable. The blue input spectrum on the left shows a voice with broadband noise and a hum peak; the green output spectrum on the right shows the same voice with the noise floor pushed down. Below are the denoise mode, strength, high-pass, gate and output gain sliders, and the status bar reads Running, Engine: Python, DSP 0.86 ms per 10 ms frame." width="100%">
   </picture>
   <br><sub><b>Filter &amp; Spectrum.</b> The input (blue) and the cleaned output (green) side by side, with the original drawn faintly behind the output.</sub>
 </p>
 
 <p align="center">
   <a href="#a-tour">A tour</a> ·
-  <a href="#why-noise-filter">Why Noise Filter</a> ·
+  <a href="#why-tapis">Why Tapis</a> ·
   <a href="#what-works-today">What works today</a> ·
   <a href="#install">Install</a> ·
   <a href="#quick-start-from-source">From source</a> ·
@@ -70,7 +71,7 @@ from a synthetic voice-plus-noise signal, so anyone can regenerate them after a 
 </tr>
 </table>
 
-## Why Noise Filter
+## Why Tapis
 
 - **Low latency.** Fixed 10 ms frames at 48 kHz and one frame of algorithmic delay. The C++ core
   processes a frame in about 0.02 ms, so the audio thread never waits on Python.
@@ -82,7 +83,7 @@ from a synthetic voice-plus-noise signal, so anyone can regenerate them after a 
   real signal, so you can find a hum or a whistle and remove it precisely.
 - **Gets better over time.** Users can choose to share short room-noise clips. Each clip is
   voice-checked on the PC, reviewed by a person, and used in the weekly model retraining.
-- **Built for automation.** Every control is reachable from `nfctl` and from an MCP server, so
+- **Built for automation.** Every control is reachable from `tapisctl` and from an MCP server, so
   scripts and AI assistants can drive the running app.
 - **Private and open.** Audio is processed on your PC and never streamed anywhere. MIT-licensed
   source; the [privacy policy](PRIVACY.md) lists exactly what can leave the PC.
@@ -100,17 +101,17 @@ from a synthetic voice-plus-noise signal, so anyone can regenerate them after a 
 | **Background** | System-tray icon, keep running when closed, start with Windows, resume filtering at launch, single instance |
 | **AI model** | Trained in GitHub Actions on public 48 kHz data, shipped with the installer, verified automatic updates, live model swap |
 | **Noise samples** | Opt-in sharing after *Learn noise*, *Record noise…* or *Send a noise file…*; on-device voice check; human review before training |
-| **Control** | `nfctl` command line (JSON output) and an MCP server for AI apps, over a local per-user named pipe |
+| **Control** | `tapisctl` command line (JSON output) and an MCP server for AI apps, over a local per-user named pipe |
 | **Interface** | Light, Dark and System themes; English and Bahasa Indonesia; fits 1366 × 768 laptops at 125 % scaling |
 
 Details for each release are in the [changelog](CHANGELOG.md); what comes next is in the [roadmap](ROADMAP.md).
 
 ## Install
 
-1. Download **`NoiseFilter-Setup-<version>.exe`** from the [latest release](https://github.com/SkillsHUB-Electronics/Noise-Filter/releases/latest).
+1. Download **`Tapis-Setup-<version>.exe`** from the [latest release](https://github.com/SkillsHUB-Electronics/tapis/releases/latest).
 2. Run it. The installer works offline: Python, Qt, the C++ core, the AI model and VB-CABLE are
    all inside. VB-CABLE is installed only if it is not there yet.
-3. Open **Noise Filter**, choose your microphone as the input, keep **CABLE Input** as the output,
+3. Open **Tapis**, choose your microphone as the input, keep **CABLE Input** as the output,
    and press **Start**.
 4. In your meeting app, choose **CABLE Output (VB-Audio Virtual Cable)** as the microphone.
 
@@ -120,12 +121,12 @@ working? See [troubleshooting](docs/troubleshooting.md).
 ## Quick start (from source)
 
 ```powershell
-git clone https://github.com/SkillsHUB-Electronics/Noise-Filter
-cd Noise-Filter
+git clone https://github.com/SkillsHUB-Electronics/tapis
+cd tapis
 pip install -e .[audio,ai,ui]
-noise-filter ui                 # the desktop app (add --demo for a synthetic signal, no mic needed)
-noise-filter devices            # list audio devices
-noise-filter run --in <id> --out <id of "CABLE Input"> [--exclusive]
+tapis ui                        # the desktop app (add --demo for a synthetic signal, no mic needed)
+tapis devices                   # list audio devices
+tapis run --in <id> --out <id of "CABLE Input"> [--exclusive]
 ```
 
 The app runs on pure Python out of the box. Building the C++ core (about 15x cheaper DSP) and the
@@ -136,11 +137,11 @@ installer, and running the tests, are covered in [docs/building.md](docs/buildin
 The running app can be controlled from a terminal, a script or an AI assistant. Every command prints JSON.
 
 ```powershell
-nfctl status                                    # on/off, devices, every setting, levels, latency
-nfctl start                                     # opens the app in the tray first if needed
-nfctl set strength=1.3 highpass_hz=100 denoise=ai
-nfctl preset voice_clarity hum_50
-claude mcp add noise-filter -- "C:\Program Files\Noise Filter\nfctl.exe" mcp
+tapisctl status                                 # on/off, devices, every setting, levels, latency
+tapisctl start                                  # opens the app in the tray first if needed
+tapisctl set strength=1.3 highpass_hz=100 denoise=ai
+tapisctl preset voice_clarity hum_50
+claude mcp add tapis -- "C:\Program Files\Tapis\tapisctl.exe" mcp
 ```
 
 The MCP server exposes `get_status`, `start_filter`, `stop_filter`, `set_settings`, `list_devices`,
@@ -161,7 +162,7 @@ Mic ─▶ [ high-pass ─▶ denoise ─▶ EQ ─▶ gate ─▶ compressor �
 | Core (realtime) | [`cpp/`](cpp) | nf-core: 1:1 C++17 port of the core, WASAPI engine, C API, `nf-cli`. Checked sample by sample against Python |
 | AI model | [`training/`](training) | NFNet training, evaluation, ONNX export and publishing (runs in GitHub Actions) |
 | App | [`noise_filter/ui/`](noise_filter/ui) | PySide6 + pyqtgraph desktop app, tray, settings, themes, EN/ID |
-| Control | [`noise_filter/remote.py`](noise_filter/remote.py), [`ctl.py`](noise_filter/ctl.py), [`mcp_server.py`](noise_filter/mcp_server.py) | Named-pipe control channel, `nfctl` and the MCP server |
+| Control | [`noise_filter/remote.py`](noise_filter/remote.py), [`ctl.py`](noise_filter/ctl.py), [`mcp_server.py`](noise_filter/mcp_server.py) | Named-pipe control channel, `tapisctl` and the MCP server |
 | Cloud | [`cloud/worker/`](cloud/worker) | Cloudflare Worker + R2 for opt-in noise samples and the review page |
 | Packaging | [`packaging/windows/`](packaging/windows) | PyInstaller app and Inno Setup installer with VB-CABLE |
 
@@ -169,7 +170,7 @@ More in [docs/architecture.md](docs/architecture.md).
 
 ## Roadmap
 
-Noise Filter is in **beta** and focused on the Windows PC app. Ideas being considered include a
+Tapis is in **beta** and focused on the Windows PC app. Ideas being considered include a
 stronger AI model, a code-signed installer and per-app presets. A phone version is on
 hold because Android and iOS do not let an app provide a virtual microphone to other apps.
 Details: [ROADMAP.md](ROADMAP.md).
@@ -177,13 +178,13 @@ Details: [ROADMAP.md](ROADMAP.md).
 ## Contributing
 
 Bug reports, feature ideas and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md),
-use the [issue templates](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues/new/choose), and
+use the [issue templates](https://github.com/SkillsHUB-Electronics/tapis/issues/new/choose), and
 report security problems privately as described in [SECURITY.md](SECURITY.md). Everyone taking part
 follows the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## License, privacy and credits
 
-Noise Filter's source code is under the [MIT License](LICENSE). Copyright (c) 2026 SkillsHUB Electronics.
+Tapis's source code is under the [MIT License](LICENSE). Copyright (c) 2026 SkillsHUB Electronics.
 
 The bundled AI model is trained on data with non-commercial licenses (EARS, ESC-50), so the model
 files are for **non-commercial use only**. Qt/PySide6 (LGPL), ONNX Runtime, NumPy, pocketfft,

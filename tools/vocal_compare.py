@@ -172,7 +172,7 @@ def chart(out, hs, rows, held):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(2, 3, figsize=(15, 7.8), constrained_layout=True)
-    fig.suptitle("Noise Filter: Vocal mode on a sung note (synthetic voice, fan noise)", fontsize=13)
+    fig.suptitle("Tapis: Vocal mode on a sung note (synthetic voice, fan noise)", fontsize=13)
     for a, (title, key) in zip(ax[0], [("Noisy input", "noisy"), ("Standard filter (strength 1.0)", "standard"),
                                        ("Vocal mode", "vocal")]):
         a.specgram(hs[key], NFFT=2048, Fs=SR, noverlap=1536, cmap="magma", vmin=-150, vmax=-40)
