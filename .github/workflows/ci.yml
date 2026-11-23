@@ -15,10 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime (Windows)
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://github.com/microsoft/onnxruntime/releases/download/v1.20.1/onnxruntime-win-x64-1.20.1.zip -OutFile ort.zip
-          Expand-Archive ort.zip -DestinationPath . -Force
+        run: python tools/ci/get_onnxruntime.py win-x64 1.20.1
       - name: Build nf-core (MSVC, with ONNX Runtime)
         run: |
           cmake -S cpp -B cpp/build -A x64 -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR="$PWD/onnxruntime-win-x64-1.20.1"
@@ -56,9 +53,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime
-        run: |
-          curl -sSL -o ort.tgz https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz
-          tar xzf ort.tgz
+        run: python tools/ci/get_onnxruntime.py linux-x64 ${ORT_VERSION}
       - name: Build nf-core with ONNX
         run: |
           cmake -S cpp -B cpp/build -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR=$PWD/onnxruntime-linux-x64-${ORT_VERSION}
@@ -83,10 +78,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime (Windows)
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://github.com/microsoft/onnxruntime/releases/download/v1.20.1/onnxruntime-win-x64-1.20.1.zip -OutFile ort.zip
-          Expand-Archive ort.zip -DestinationPath . -Force
+        run: python tools/ci/get_onnxruntime.py win-x64 1.20.1
       - name: Build nf-core (MSVC, with ONNX Runtime)
         run: |
           cmake -S cpp -B cpp/build -A x64 -DNF_BUILD_TESTS=OFF -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR="$PWD/onnxruntime-win-x64-1.20.1"
