@@ -20,5 +20,11 @@ rules there apply to agents too. The points that are easy to miss:
   Cloudflare Worker `noise-filter-samples` (installed apps upload to its URL). Do not rename them
   without a migration plan. User data lives in `%APPDATA%\Tapis` (`noise_filter/paths.py` moves the
   old `NoiseFilter` folder).
+- **Errors users see.** Audio device failures go through `noise_filter/audio/errors.py` (HRESULT /
+  PortAudio code -> reason) and `noise_filter/ui/mic_help.py` (explanation + button to the Windows
+  Settings page). Network calls go through `noise_filter/net.py` (Windows trust store, retries,
+  `NetError.reason`). Do not show raw exception text as the only message.
+- **Record what changed.** Every change gets a CHANGELOG entry, so the maintainer's other devices
+  and the next agent session know what happened without reading the diff.
 - **Report only what ran.** Say which tests you ran and which you could not run (for example the
   Windows-only WASAPI engine), and rely on CI for the rest.
