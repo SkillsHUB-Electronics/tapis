@@ -5,7 +5,7 @@ from .core import Pipeline, PipelineConfig, FRAME_SIZE, FRAME_MS
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(prog="noise-filter")
+    ap = argparse.ArgumentParser(prog="tapis")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("devices", help="list input/output devices (WASAPI)")
     ui = sub.add_parser("ui", help="open the graphical interface")

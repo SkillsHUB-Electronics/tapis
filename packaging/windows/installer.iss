@@ -1,6 +1,6 @@
 ; Inno Setup script: one offline setup.exe with the frozen app and VB-CABLE.
 ; Build: iscc /DAppVersion=0.2.0 packaging\windows\installer.iss
-;   expects dist\NoiseFilter\ (PyInstaller output) and build\vbcable\ (extracted VBCABLE_Driver_Pack)
+;   expects dist\Tapis\ (PyInstaller output) and build\vbcable\ (extracted VBCABLE_Driver_Pack)
 
 #ifndef AppVersion
   #define AppVersion "0.2.0"
@@ -8,21 +8,26 @@
 #define Root "..\.."
 
 [Setup]
+; The AppId is unchanged since the app was called "Noise Filter", so this setup updates an old
+; installation in place of adding a second one (see [InstallDelete] and CurStepChanged below).
 AppId={{6F0B7C1E-2B7A-4E8B-9C55-4C1F2E1A9D31}
-AppName=Noise Filter
+AppName=Tapis
 AppVersion={#AppVersion}
 AppPublisher=SkillsHUB Electronics
-DefaultDirName={autopf}\Noise Filter
-DefaultGroupName=Noise Filter
+DefaultDirName={autopf}\Tapis
+DefaultGroupName=Tapis
+; move old "Noise Filter" installations to the new folder and Start menu group
+UsePreviousAppDir=no
+UsePreviousGroup=no
 OutputDir={#Root}\dist
-OutputBaseFilename=NoiseFilter-Setup-{#AppVersion}
+OutputBaseFilename=Tapis-Setup-{#AppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=admin
 WizardStyle=modern
-UninstallDisplayIcon={app}\NoiseFilter.exe
+UninstallDisplayIcon={app}\Tapis.exe
 CloseApplications=force
 ChangesEnvironment=yes
 SetupIconFile={#Root}\noise_filter\assets\icon.ico
@@ -36,7 +41,7 @@ Name: "en"; MessagesFile: "compiler:Default.isl"
 ; Inno Setup has no official Indonesian translation, so key lines are bilingual.
 InstallCable=Install VB-CABLE virtual microphone / Pasang mic virtual VB-CABLE
 CableInstalling=Installing VB-CABLE... / Memasang VB-CABLE...
-AddToPath=Add the nfctl command (control by command line / AI) to PATH / Tambahkan perintah nfctl ke PATH
+AddToPath=Add the tapisctl command (control by command line / AI) to PATH / Tambahkan perintah tapisctl ke PATH
 
 [Tasks]
 Name: "vbcable"; Description: "{cm:InstallCable}"; Check: not CableInstalled
@@ -44,31 +49,40 @@ Name: "addtopath"; Description: "{cm:AddToPath}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [Files]
-Source: "{#Root}\dist\NoiseFilter\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#Root}\dist\Tapis\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Root}\packaging\windows\VB-CABLE-NOTICE.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 Source: "{#Root}\PRIVACY.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\build\vbcable\*"; DestDir: "{tmp}\vbcable"; Flags: ignoreversion recursesubdirs deleteafterinstall; Tasks: vbcable
 
+[InstallDelete]
+; leftovers of the old name "Noise Filter" (before 0.11.0); settings in %APPDATA% are kept and moved by the app
+Type: filesandordirs; Name: "{autopf}\Noise Filter"
+Type: filesandordirs; Name: "{autoprograms}\Noise Filter"
+Type: files; Name: "{autodesktop}\Noise Filter.lnk"
+Type: files; Name: "{commondesktop}\Noise Filter.lnk"
+
 [Icons]
-Name: "{group}\Noise Filter"; Filename: "{app}\NoiseFilter.exe"
-Name: "{group}\{cm:UninstallProgram,Noise Filter}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Noise Filter"; Filename: "{app}\NoiseFilter.exe"; Tasks: desktopicon
+Name: "{group}\Tapis"; Filename: "{app}\Tapis.exe"
+Name: "{group}\{cm:UninstallProgram,Tapis}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\Tapis"; Filename: "{app}\Tapis.exe"; Tasks: desktopicon
 
 [Registry]
 ; The app writes this value itself ("Start with Windows" setting); remove it on uninstall.
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "Tapis"; \
+  ValueType: none; Flags: uninsdeletevalue dontcreatekey
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "NoiseFilter"; \
   ValueType: none; Flags: uninsdeletevalue dontcreatekey
 
-; nfctl.exe (command-line / AI control) is reachable from any terminal
+; tapisctl.exe (command-line / AI control) is reachable from any terminal
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueName: "Path"; \
   ValueType: expandsz; ValueData: "{olddata};{app}"; Tasks: addtopath; Check: NeedsAddPath(ExpandConstant('{app}'))
 
 [Run]
 Filename: "{tmp}\vbcable\VBCABLE_Setup_x64.exe"; Parameters: "-i -h"; StatusMsg: "{cm:CableInstalling}"; \
   Flags: waituntilterminated; Tasks: vbcable; AfterInstall: AfterCable
-Filename: "{app}\NoiseFilter.exe"; Description: "{cm:LaunchProgram,Noise Filter}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Tapis.exe"; Description: "{cm:LaunchProgram,Tapis}"; Flags: nowait postinstall skipifsilent
 
 [Code]
 var CableJustInstalled: Boolean;
@@ -114,6 +128,31 @@ begin
   else
     Delete(Paths, P - 1, Length(Dir) + 1);
   RegWriteExpandStringValue(HKLM, EnvKey, 'Path', Paths);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var Code: Integer;
+begin
+  { an old "Noise Filter" may still be running from the folder that [InstallDelete] removes }
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM NoiseFilter.exe', '', SW_HIDE, ewWaitUntilTerminated, Code);
+  Result := '';
+end;
+
+const RunKey = 'Software\Microsoft\Windows\CurrentVersion\Run';
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+  begin
+    { the old install folder is gone, so take it off PATH }
+    RemovePath(ExpandConstant('{autopf}\Noise Filter'));
+    { keep "Start with Windows" on for people who had it on under the old name }
+    if RegValueExists(HKCU, RunKey, 'NoiseFilter') then
+    begin
+      RegWriteStringValue(HKCU, RunKey, 'Tapis', '"' + ExpandConstant('{app}\Tapis.exe') + '" ui --minimized');
+      RegDeleteValue(HKCU, RunKey, 'NoiseFilter');
+    end;
+  end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

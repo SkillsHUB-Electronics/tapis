@@ -1,6 +1,6 @@
 # Architecture
 
-Noise Filter is a Windows desktop app with a realtime audio core. Python is the reference
+Tapis is a Windows desktop app with a realtime audio core. Python is the reference
 implementation and the UI; C++ runs the audio in production. Both process the same 10 ms frames
 and are checked against each other sample by sample.
 
@@ -38,13 +38,13 @@ input analyzer                                               output analyzer
 | C++ core | `cpp/` | nf-core: 1:1 C++17 port, event-driven WASAPI engine with MMCSS "Pro Audio" priority, C API in `include/nf/nf.h`, `nf-cli`. See [cpp/README.md](../cpp/README.md) |
 | Bridge | `noise_filter/core/native.py` | Loads `nf_core.dll` with ctypes; falls back to Python when it is missing or `NF_CORE_DISABLE=1` |
 | Audio (Python) | `noise_filter/audio/` | sounddevice engine and device list, used when the C++ core is not built |
-| Desktop app | `noise_filter/ui/` | PySide6 + pyqtgraph: `main_window.py`, `eq_panel.py`, `dynamics_panel.py`, `theme.py`, tray, `settings.py` (`%APPDATA%\NoiseFilter\config.json`) |
+| Desktop app | `noise_filter/ui/` | PySide6 + pyqtgraph: `main_window.py`, `eq_panel.py`, `dynamics_panel.py`, `theme.py`, tray, `settings.py` (`%APPDATA%\Tapis\config.json`) |
 | Strings | `noise_filter/i18n/` | `en.json` (primary) and `id.json` |
-| Control | `noise_filter/remote.py`, `ctl.py`, `mcp_server.py`, `ui/control_server.py` | Per-user named pipe, `nfctl`, MCP server. See [control.md](control.md) |
+| Control | `noise_filter/remote.py`, `ctl.py`, `mcp_server.py`, `ui/control_server.py` | Per-user named pipe, `tapisctl`, MCP server. See [control.md](control.md) |
 | AI model | `training/`, `noise_filter/models/`, `noise_filter/model_update.py` | NFNet training in CI; bundled model plus verified updates |
 | Noise samples | `noise_filter/contribute.py`, `cloud/worker/` | Opt-in upload, Cloudflare Worker + R2, review page |
 | Legal | `noise_filter/legal/` | Source of truth for LICENSE, PRIVACY and THIRD_PARTY_NOTICES (root copies must match) |
-| Packaging | `packaging/windows/` | PyInstaller spec, Inno Setup script, `nfctl` launcher, VB-CABLE notice |
+| Packaging | `packaging/windows/` | PyInstaller spec, Inno Setup script, `tapisctl` launcher, VB-CABLE notice |
 
 ## Threads
 

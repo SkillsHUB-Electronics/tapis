@@ -1,8 +1,8 @@
-# Kebijakan Privasi Noise Filter
+# Kebijakan Privasi Tapis
 
 Terakhir diperbarui: 14 November 2026 (aplikasi versi 0.9.0)
 
-Noise Filter adalah aplikasi Windows dari SkillsHUB Electronics untuk membersihkan suara mikrofon. Kebijakan ini
+Tapis adalah aplikasi Windows dari SkillsHUB Electronics untuk membersihkan suara mikrofon. Kebijakan ini
 menjelaskan data apa yang ditangani aplikasi, apa yang keluar dari PC Anda dan kapan, serta cara menghapusnya.
 Versi bahasa Inggris ([PRIVACY.md](PRIVACY.md)) adalah versi utama.
 
@@ -20,18 +20,18 @@ Versi bahasa Inggris ([PRIVACY.md](PRIVACY.md)) adalah versi utama.
 
 | Apa | Di mana | Untuk apa |
 |---|---|---|
-| Pengaturan (perangkat, filter, equalizer, tema, bahasa, ukuran jendela) | `%APPDATA%\NoiseFilter\config.json` | Mengingat pilihan Anda |
-| Model AI yang diunduh | `%APPDATA%\NoiseFilter\models\` | Model peredam noise yang lebih baru |
-| Status berbagi sampel: ID instalasi acak, pilihan persetujuan, jumlah sampel terkirim | `%APPDATA%\NoiseFilter\contribute.json` | Agar Anda bisa menghapus sampel nanti |
+| Pengaturan (perangkat, filter, equalizer, tema, bahasa, ukuran jendela) | `%APPDATA%\Tapis\config.json` | Mengingat pilihan Anda |
+| Model AI yang diunduh | `%APPDATA%\Tapis\models\` | Model peredam noise yang lebih baru |
+| Status berbagi sampel: ID instalasi acak, pilihan persetujuan, jumlah sampel terkirim | `%APPDATA%\Tapis\contribute.json` | Agar Anda bisa menghapus sampel nanti |
 | Profil "Pelajari noise ruangan saya" | Hanya di memori | Peredaman lebih baik; hilang saat aplikasi ditutup |
 
 Aliran suara dari mikrofon melewati filter di memori, 10 ms setiap kali, lalu dikirim ke perangkat output yang
 Anda pilih (misalnya VB-CABLE). Suara itu tidak disimpan.
 
-**Kendali lokal.** Perintah `nfctl` dan server MCP untuk asisten AI berbicara dengan aplikasi melalui pipe lokal
+**Kendali lokal.** Perintah `tapisctl` dan server MCP untuk asisten AI berbicara dengan aplikasi melalui pipe lokal
 yang hanya bisa dibuka oleh akun Windows Anda. Tidak ada yang lewat jaringan.
 
-Menghapus instalasi aplikasi tidak menghapus `%APPDATA%\NoiseFilter`; hapus folder itu untuk membuang file-file ini.
+Menghapus instalasi aplikasi tidak menghapus `%APPDATA%\Tapis`; hapus folder itu untuk membuang file-file ini.
 
 ## 2. Pemeriksaan pembaruan model AI
 
@@ -74,7 +74,7 @@ jaringannya, sesuai [Cloudflare Privacy Policy](https://www.cloudflare.com/priva
 1. Pemeriksaan otomatis berjalan setiap hari (format, panjang, clipping, deteksi suara orang, duplikat).
 2. Pengembang **mendengarkan setiap sampel** di halaman review yang dilindungi kata sandi, lalu menerima atau
    menolaknya.
-3. Hanya sampel yang diterima yang dipakai untuk melatih versi baru model AI Noise Filter. Pelatihan berjalan di
+3. Hanya sampel yang diterima yang dipakai untuk melatih versi baru model AI Tapis. Pelatihan berjalan di
    GitHub Actions; model hasilnya diterbitkan di repositori GitHub publik.
 4. Sampel yang ditolak dihapus otomatis setelah 30 hari. Sampel yang diterima disimpan untuk pelatihan berikutnya
    sampai Anda menghapusnya.
@@ -91,7 +91,7 @@ itu tidak bisa "melupakannya", tetapi sampelnya sendiri hilang. Tombol hapus bek
 
 ## 4. Anak-anak
 
-Noise Filter tidak ditujukan untuk anak-anak dan tidak dengan sengaja mengumpulkan data pribadi siapa pun. Sampel
+Tapis tidak ditujukan untuk anak-anak dan tidak dengan sengaja mengumpulkan data pribadi siapa pun. Sampel
 noise tidak boleh berisi suara orang.
 
 ## 5. Perubahan
@@ -102,5 +102,5 @@ Perubahan yang mengirim jenis data baru akan meminta persetujuan Anda lagi.
 ## 6. Kontak
 
 Pertanyaan atau permintaan: buka issue di
-[github.com/SkillsHUB-Electronics/Noise-Filter/issues](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues).
+[github.com/SkillsHUB-Electronics/tapis/issues](https://github.com/SkillsHUB-Electronics/tapis/issues).
 Jangan menulis data pribadi di issue publik; minta kontak privat di sana jika perlu.

@@ -1,4 +1,4 @@
-"""Control a running Noise Filter from another process (command line, scripts, AI agents).
+"""Control a running Tapis from another process (command line, scripts, AI agents).
 
 The app listens on a local pipe that only the signed-in Windows user can open (a Unix socket in the
 temp folder elsewhere). Each request is one JSON line, each answer one JSON line:
@@ -6,7 +6,7 @@ temp folder elsewhere). Each request is one JSON line, each answer one JSON line
     -> {"cmd": "set", "args": {"strength": 1.2}}
     <- {"ok": true, "result": {...}}      or      {"ok": false, "error": "..."}
 
-This module has no Qt import, so `noise-filter ctl ...` and the MCP server start fast.
+This module has no Qt import, so `tapis ctl ...` and the MCP server start fast.
 """
 from __future__ import annotations
 
@@ -55,7 +55,7 @@ class ControlError(Exception):
 
 
 class NotRunning(ControlError):
-    """No Noise Filter is open for this user."""
+    """No Tapis is open for this user."""
 
 
 def server_name() -> str:
@@ -66,7 +66,7 @@ def server_name() -> str:
         user = getpass.getuser()
     except Exception:
         user = "user"
-    return f"SkillsHUB.NoiseFilter.{user}"
+    return f"SkillsHUB.Tapis.{user}"
 
 
 def _pipe_path(name: str) -> str:
@@ -128,10 +128,10 @@ def _exchange_windows(path: str, data: bytes, deadline: float) -> bytes:
             f = open(path, "r+b", buffering=0)
             break
         except FileNotFoundError:
-            raise NotRunning("Noise Filter is not running")
+            raise NotRunning("Tapis is not running")
         except OSError as e:            # ERROR_PIPE_BUSY: the app is opening the next pipe instance
             if time.monotonic() > deadline:
-                raise ControlError(f"Noise Filter did not accept the connection: {e}")
+                raise ControlError(f"Tapis did not accept the connection: {e}")
             time.sleep(0.05)
     with f:
         f.write(data)
@@ -151,7 +151,7 @@ def _exchange_unix(path: str, data: bytes, deadline: float) -> bytes:
         s.connect(path)
     except (FileNotFoundError, ConnectionRefusedError):
         s.close()
-        raise NotRunning("Noise Filter is not running")
+        raise NotRunning("Tapis is not running")
     with s:
         s.sendall(data)
         out = b""
@@ -181,7 +181,7 @@ def request(cmd: str, timeout: float = 10.0, **args):
     t.start()
     t.join(timeout)
     if t.is_alive():
-        raise ControlError(f"Noise Filter did not answer within {timeout:.0f} s")
+        raise ControlError(f"Tapis did not answer within {timeout:.0f} s")
     if "err" in box:
         e = box["err"]
         if isinstance(e, ControlError):
@@ -189,7 +189,7 @@ def request(cmd: str, timeout: float = 10.0, **args):
         raise ControlError(f"connection failed: {e}") from e
     raw = box.get("out", b"").strip()
     if not raw:
-        raise ControlError("Noise Filter closed the connection without an answer")
+        raise ControlError("Tapis closed the connection without an answer")
     reply = json.loads(raw.decode("utf-8"))
     if not reply.get("ok"):
         raise ControlError(reply.get("error", "unknown error"))
@@ -205,9 +205,9 @@ def is_running() -> bool:
 
 
 def launch_command() -> list[str]:
-    """How to open the app hidden in the tray: the frozen NoiseFilter.exe next to this program, or Python."""
+    """How to open the app hidden in the tray: the frozen Tapis.exe next to this program, or Python."""
     if getattr(sys, "frozen", False):
-        exe = os.path.join(os.path.dirname(sys.executable), "NoiseFilter.exe")
+        exe = os.path.join(os.path.dirname(sys.executable), "Tapis.exe")
         return [exe, "ui", "--minimized"]
     return [sys.executable, "-m", "noise_filter.cli", "ui", "--minimized"]
 
@@ -228,4 +228,4 @@ def launch(wait: float = 20.0) -> bool:
         time.sleep(0.3)
         if is_running():
             return True
-    raise ControlError(f"Noise Filter did not start within {wait:.0f} s")
+    raise ControlError(f"Tapis did not start within {wait:.0f} s")

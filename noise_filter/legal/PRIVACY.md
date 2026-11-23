@@ -1,8 +1,8 @@
-# Noise Filter Privacy Policy
+# Tapis Privacy Policy
 
 Last updated: 14 November 2026 (app version 0.9.0)
 
-Noise Filter is a Windows app by SkillsHUB Electronics that cleans up your microphone sound. This policy says
+Tapis is a Windows app by SkillsHUB Electronics that cleans up your microphone sound. This policy says
 what data the app handles, what leaves your PC and when, and how you can delete it. Bahasa Indonesia:
 [PRIVACY.id.md](noise_filter/legal/PRIVACY.id.md).
 
@@ -19,18 +19,18 @@ what data the app handles, what leaves your PC and when, and how you can delete 
 
 | What | Where | Why |
 |---|---|---|
-| Settings (devices, filter, equalizer, theme, language, window size) | `%APPDATA%\NoiseFilter\config.json` | To remember your choices |
-| Downloaded AI models | `%APPDATA%\NoiseFilter\models\` | Newer noise-reduction models |
-| Sample-sharing state: a random installation ID, your consent choice, how many samples you sent | `%APPDATA%\NoiseFilter\contribute.json` | So you can delete your samples later |
+| Settings (devices, filter, equalizer, theme, language, window size) | `%APPDATA%\Tapis\config.json` | To remember your choices |
+| Downloaded AI models | `%APPDATA%\Tapis\models\` | Newer noise-reduction models |
+| Sample-sharing state: a random installation ID, your consent choice, how many samples you sent | `%APPDATA%\Tapis\contribute.json` | So you can delete your samples later |
 | "Learn my room noise" profile | Memory only | Better noise reduction; gone when the app closes |
 
 The audio stream from your microphone passes through the filter in memory, 10 ms at a time, and is sent to
 the output device you chose (for example VB-CABLE). It is not saved.
 
-**Local control.** The command-line tool `nfctl` and the MCP server for AI assistants talk to the app through
+**Local control.** The command-line tool `tapisctl` and the MCP server for AI assistants talk to the app through
 a local pipe that only your Windows user account can open. Nothing goes over the network.
 
-Uninstalling the app does not remove `%APPDATA%\NoiseFilter`; delete that folder to remove these files.
+Uninstalling the app does not remove `%APPDATA%\Tapis`; delete that folder to remove these files.
 
 ## 2. AI model update check
 
@@ -72,7 +72,7 @@ network, as described in the [Cloudflare Privacy Policy](https://www.cloudflare.
 
 1. An automatic check runs every day (format, length, clipping, voice detection, duplicates).
 2. The developer **listens to every sample** on a password-protected review page and accepts or rejects it.
-3. Only accepted samples are used to train new versions of the Noise Filter AI model. Training runs on
+3. Only accepted samples are used to train new versions of the Tapis AI model. Training runs on
    GitHub Actions; the resulting model is published in the public GitHub repository.
 4. Rejected samples are deleted automatically after 30 days. Accepted samples are kept for future training
    until you delete them.
@@ -89,7 +89,7 @@ the installation ID in `contribute.json`, so press it **before** you uninstall o
 
 ## 4. Children
 
-Noise Filter is not directed at children and does not knowingly collect personal data from anyone. Noise
+Tapis is not directed at children and does not knowingly collect personal data from anyone. Noise
 samples must not contain voices.
 
 ## 5. Changes
@@ -100,5 +100,5 @@ date. A change that sends new kinds of data will ask for your consent again.
 ## 6. Contact
 
 Questions or requests: open an issue at
-[github.com/SkillsHUB-Electronics/Noise-Filter/issues](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues).
+[github.com/SkillsHUB-Electronics/tapis/issues](https://github.com/SkillsHUB-Electronics/tapis/issues).
 Do not post personal data in a public issue; ask there for a private contact if you need one.

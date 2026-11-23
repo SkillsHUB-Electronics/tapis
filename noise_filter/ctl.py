@@ -1,4 +1,4 @@
-"""`noise-filter ctl ...`: control the running app from a terminal, a script or an AI agent.
+"""`tapis ctl ...`: control the running app from a terminal, a script or an AI agent.
 
 Every command prints JSON on stdout. Exit codes: 0 ok, 1 error, 3 the app is not running.
 """
@@ -12,16 +12,16 @@ import time
 from . import remote
 
 EXAMPLES = """examples:
-  nfctl status
-  nfctl start                      (opens the app in the tray first if needed)
-  nfctl set strength=1.3 highpass_hz=100 denoise=ai
-  nfctl set vocal_mode=on mix=0.8        (singing: keep harmonics, blend in 20 % original)
-  nfctl devices
-  nfctl device --input "USB" --output "CABLE Input"
-  nfctl preset voice_clarity hum_50
-  nfctl preset --clear
-  nfctl learn
-  nfctl stop
+  tapisctl status
+  tapisctl start                      (opens the app in the tray first if needed)
+  tapisctl set strength=1.3 highpass_hz=100 denoise=ai
+  tapisctl set vocal_mode=on mix=0.8        (singing: keep harmonics, blend in 20 % original)
+  tapisctl devices
+  tapisctl device --input "USB" --output "CABLE Input"
+  tapisctl preset voice_clarity hum_50
+  tapisctl preset --clear
+  tapisctl learn
+  tapisctl stop
 """
 
 
@@ -61,10 +61,10 @@ def fill(p: argparse.ArgumentParser) -> None:
 def mcp_config() -> dict:
     if getattr(sys, "frozen", False):
         import os
-        cmd, args = os.path.join(os.path.dirname(sys.executable), "nfctl.exe"), ["mcp"]
+        cmd, args = os.path.join(os.path.dirname(sys.executable), "tapisctl.exe"), ["mcp"]
     else:
         cmd, args = sys.executable, ["-m", "noise_filter.cli", "mcp"]
-    return {"mcpServers": {"noise-filter": {"command": cmd, "args": args}}}
+    return {"mcpServers": {"tapis": {"command": cmd, "args": args}}}
 
 
 def run(a) -> int:

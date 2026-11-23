@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from importlib import resources
 
-REPO_URL = "https://github.com/SkillsHUB-Electronics/Noise-Filter"
+REPO_URL = "https://github.com/SkillsHUB-Electronics/tapis"
 COPYRIGHT = "© 2026 SkillsHUB Electronics"
 # document key -> file name per language ("en" is the fallback)
 DOCS = {

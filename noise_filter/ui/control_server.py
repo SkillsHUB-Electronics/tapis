@@ -115,7 +115,7 @@ class Controller:
 
     # ---------- commands ----------
     def cmd_ping(self):
-        return {"app": "Noise Filter", "version": __version__}
+        return {"app": "Tapis", "version": __version__}
 
     def cmd_help(self):
         return {"commands": self.commands(),

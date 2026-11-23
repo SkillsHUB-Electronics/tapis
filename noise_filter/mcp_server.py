@@ -1,4 +1,4 @@
-"""MCP server (stdio) so AI apps can control Noise Filter: `nfctl mcp` / `noise-filter mcp`.
+"""MCP server (stdio) so AI apps can control Tapis: `tapisctl mcp` / `tapis mcp`.
 
 Speaks the Model Context Protocol's JSON-RPC over stdin/stdout (one message per line) with no extra
 dependency. Each tool forwards to the running app through noise_filter.remote.
@@ -14,7 +14,7 @@ from . import __version__, remote
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 
 INSTRUCTIONS = (
-    "Noise Filter cleans the user's microphone in real time on this Windows PC and sends it to a virtual "
+    "Tapis cleans the user's microphone in real time on this Windows PC and sends it to a virtual "
     "microphone (VB-CABLE: apps should use 'CABLE Output' as their mic). Use get_status first. start_filter "
     "opens the app if needed. Settings change live; to learn the room noise ask the user to stay quiet, then "
     "call learn_noise.")
@@ -53,9 +53,9 @@ TOOLS = [
                                                    "description": "preset ids or names, e.g. voice_clarity, hum_50, podcast"}},
       "required": ["presets"], "additionalProperties": False}),
     ("learn_noise", "Learn the room noise for 3 seconds from the live microphone. The user must be quiet. Filter must be on.", EMPTY),
-    ("show_window", "Show the Noise Filter window.", EMPTY),
+    ("show_window", "Show the Tapis window.", EMPTY),
     ("hide_window", "Hide the window to the system tray (the filter keeps running).", EMPTY),
-    ("quit_app", "Close Noise Filter completely (the virtual mic goes silent).", EMPTY),
+    ("quit_app", "Close Tapis completely (the virtual mic goes silent).", EMPTY),
 ]
 
 
@@ -100,7 +100,7 @@ def handle(msg: dict) -> dict | None:
         asked = params.get("protocolVersion")
         return ok({"protocolVersion": asked if asked in PROTOCOL_VERSIONS else PROTOCOL_VERSIONS[0],
                    "capabilities": {"tools": {}},
-                   "serverInfo": {"name": "noise-filter", "version": __version__},
+                   "serverInfo": {"name": "tapis", "version": __version__},
                    "instructions": INSTRUCTIONS})
     if method == "ping":
         return ok({})
@@ -115,7 +115,7 @@ def handle(msg: dict) -> dict | None:
             return ok({"content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False, indent=1)}],
                        "isError": False})
         except remote.NotRunning:
-            text = "Noise Filter is not running. Call start_filter to open it."
+            text = "Tapis is not running. Call start_filter to open it."
         except remote.ControlError as e:
             text = str(e)
         return ok({"content": [{"type": "text", "text": text}], "isError": True})

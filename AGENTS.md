@@ -1,6 +1,6 @@
 # Instructions for AI agents
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md) first. The
+See also [CLAUDE.md](CLAUDE.md) for the rename to Tapis. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md) first. The
 rules there apply to agents too. The points that are easy to miss:
 
 - **Default branch** is `ccr-b550d426-d4tmx2`. Work on a feature branch and open a pull request.
@@ -15,5 +15,10 @@ rules there apply to agents too. The points that are easy to miss:
 - **Screenshots.** After a visible UI change, run `python tools/readme_screenshots.py` and commit
   the PNGs in `docs/images/`.
 - **Releases** are published by a maintainer; agents prepare the notes but do not create tags.
+- **Name.** The app is called **Tapis** (Noise Filter before 0.11.0). Some internal names keep the
+  old one on purpose: the Python package `noise_filter`, the C++ core `nf-core`/`nf-cli`, and the
+  Cloudflare Worker `noise-filter-samples` (installed apps upload to its URL). Do not rename them
+  without a migration plan. User data lives in `%APPDATA%\Tapis` (`noise_filter/paths.py` moves the
+  old `NoiseFilter` folder).
 - **Report only what ran.** Say which tests you ran and which you could not run (for example the
   Windows-only WASAPI engine), and rely on CI for the rest.

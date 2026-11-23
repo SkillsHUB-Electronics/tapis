@@ -296,8 +296,8 @@ def encode_wav(x: np.ndarray) -> bytes:
 
 
 def _state_path() -> Path:
-    base = os.environ.get("APPDATA") or str(Path.home() / ".config")
-    return Path(base) / "NoiseFilter" / "contribute.json"
+    from .paths import data_dir
+    return data_dir() / "contribute.json"
 
 
 def load_state() -> dict:
@@ -341,7 +341,7 @@ def upload(x: np.ndarray, category: str, timeout: float = 20.0, source: str = "m
     req = urllib.request.Request(
         SAMPLES_URL.rstrip("/") + "/v1/samples", data=encode_wav(x), method="POST",
         headers={"Content-Type": "audio/wav", "X-NF-Meta": json.dumps(meta),
-                 "User-Agent": f"NoiseFilter/{__version__}"})
+                 "User-Agent": f"Tapis/{__version__}"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         res = json.loads(r.read(64 * 1024))
     if not res.get("ok"):
@@ -371,7 +371,7 @@ def delete_my_samples(timeout: float = 20.0) -> int:
         raise RuntimeError("sample upload is not configured")
     req = urllib.request.Request(
         f"{SAMPLES_URL.rstrip('/')}/v1/samples?install_id={install_id()}", method="DELETE",
-        headers={"User-Agent": f"NoiseFilter/{__version__}"})
+        headers={"User-Agent": f"Tapis/{__version__}"})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         res = json.loads(r.read(64 * 1024))
     save_state(sent=0)

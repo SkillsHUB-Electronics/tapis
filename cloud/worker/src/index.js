@@ -1,5 +1,5 @@
 /**
- * Noise Filter sample intake (F3).
+ * Tapis sample intake (F3).
  *
  * The app uploads short noise-only recordings here; they land in the R2 bucket under
  * incoming/<install_id>/. Nothing is trusted: size, WAV format, duration and metadata are

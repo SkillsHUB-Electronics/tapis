@@ -2,7 +2,7 @@
 
 ## The meeting app does not hear the filtered voice
 
-1. In Noise Filter, the **output device** must be **CABLE Input (VB-Audio Virtual Cable)**, and the
+1. In Tapis, the **output device** must be **CABLE Input (VB-Audio Virtual Cable)**, and the
    filter must be running (the status bar says *Running*).
 2. In the meeting app (Teams, Meet, Zoom, Discord, TeamTalk, OBS…), the **microphone** must be
    **CABLE Output (VB-Audio Virtual Cable)**. Input and output names are swapped on purpose: the
@@ -12,7 +12,7 @@
 
 ## There is no "CABLE Input" device
 
-VB-CABLE is not installed. Run the Noise Filter installer again (it installs VB-CABLE when it is
+VB-CABLE is not installed. Run the Tapis installer again (it installs VB-CABLE when it is
 missing) and restart Windows if the installer asks. When running from source, install VB-CABLE from
 [vb-cable.com](https://www.vb-cable.com).
 
@@ -38,15 +38,15 @@ missing) and restart Windows if the installer asks. When running from source, in
 
 The installer is not code-signed yet, so Windows may show *Windows protected your PC*. Choose
 **More info › Run anyway** if you downloaded it from the
-[official releases page](https://github.com/SkillsHUB-Electronics/Noise-Filter/releases).
+[official releases page](https://github.com/SkillsHUB-Electronics/tapis/releases).
 
 ## Reset all settings
 
-Quit Noise Filter from the tray menu, then delete `%APPDATA%\NoiseFilter\config.json`. The next
+Quit Tapis from the tray menu, then delete `%APPDATA%\Tapis\config.json`. The next
 start uses the defaults.
 
 ## Still stuck?
 
-Open a [bug report](https://github.com/SkillsHUB-Electronics/Noise-Filter/issues/new?template=bug_report.yml)
-with the Noise Filter version (Settings › About), your Windows version, the devices you use and
-what the status bar shows. The output of `nfctl status` helps a lot.
+Open a [bug report](https://github.com/SkillsHUB-Electronics/tapis/issues/new?template=bug_report.yml)
+with the Tapis version (Settings › About), your Windows version, the devices you use and
+what the status bar shows. The output of `tapisctl status` helps a lot.

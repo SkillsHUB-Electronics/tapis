@@ -15,10 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime (Windows)
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://github.com/microsoft/onnxruntime/releases/download/v1.20.1/onnxruntime-win-x64-1.20.1.zip -OutFile ort.zip
-          Expand-Archive ort.zip -DestinationPath . -Force
+        run: python tools/ci/get_onnxruntime.py win-x64 1.20.1
       - name: Build nf-core (MSVC, with ONNX Runtime)
         run: |
           cmake -S cpp -B cpp/build -A x64 -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR="$PWD/onnxruntime-win-x64-1.20.1"
@@ -56,9 +53,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime
-        run: |
-          curl -sSL -o ort.tgz https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz
-          tar xzf ort.tgz
+        run: python tools/ci/get_onnxruntime.py linux-x64 ${ORT_VERSION}
       - name: Build nf-core with ONNX
         run: |
           cmake -S cpp -B cpp/build -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR=$PWD/onnxruntime-linux-x64-${ORT_VERSION}
@@ -83,10 +78,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Download ONNX Runtime (Windows)
-        shell: pwsh
-        run: |
-          Invoke-WebRequest https://github.com/microsoft/onnxruntime/releases/download/v1.20.1/onnxruntime-win-x64-1.20.1.zip -OutFile ort.zip
-          Expand-Archive ort.zip -DestinationPath . -Force
+        run: python tools/ci/get_onnxruntime.py win-x64 1.20.1
       - name: Build nf-core (MSVC, with ONNX Runtime)
         run: |
           cmake -S cpp -B cpp/build -A x64 -DNF_BUILD_TESTS=OFF -DNF_WITH_ONNX=ON -DONNXRUNTIME_DIR="$PWD/onnxruntime-win-x64-1.20.1"
@@ -100,17 +92,17 @@ jobs:
       - name: Smoke test the frozen app
         shell: bash
         run: |
-          ls dist/NoiseFilter/_internal/noise_filter/_native
-          dist/NoiseFilter/NoiseFilter.exe selftest --out selftest.txt; code=$?
+          ls dist/Tapis/_internal/noise_filter/_native
+          dist/Tapis/Tapis.exe selftest --out selftest.txt; code=$?
           cat selftest.txt; exit $code
-      - name: Smoke test nfctl.exe (command-line / MCP control)
+      - name: Smoke test tapisctl.exe (command-line / MCP control)
         shell: bash
         run: |
-          dist/NoiseFilter/nfctl.exe help > help.txt; grep -q strength help.txt
-          code=0; dist/NoiseFilter/nfctl.exe status || code=$?
+          dist/Tapis/tapisctl.exe help > help.txt; grep -q strength help.txt
+          code=0; dist/Tapis/tapisctl.exe status || code=$?
           test $code -eq 3   # app not running -> exit code 3 with a JSON error
           printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' \
-                         '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | dist/NoiseFilter/nfctl.exe mcp > mcp.txt
+                         '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | dist/Tapis/tapisctl.exe mcp > mcp.txt
           cat mcp.txt; grep -q '"get_status"' mcp.txt
       - name: Download VB-CABLE driver pack
         shell: pwsh
@@ -130,11 +122,11 @@ jobs:
           Get-ChildItem dist/*.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: NoiseFilter-Setup
-          path: dist/NoiseFilter-Setup-*.exe
+          name: Tapis-Setup
+          path: dist/Tapis-Setup-*.exe
       - name: Attach installer to the GitHub release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
-        run: gh release upload "${{ github.event.release.tag_name }}" dist/NoiseFilter-Setup-*.exe --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" dist/Tapis-Setup-*.exe --clobber

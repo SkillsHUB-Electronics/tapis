@@ -1,6 +1,6 @@
 # Third-party notices
 
-Noise Filter's own source code is under the MIT License (see LICENSE). The Windows installer and the
+Tapis's own source code is under the MIT License (see LICENSE). The Windows installer and the
 Python package use the components below, which keep their own licenses.
 
 | Component | Used for | License | Source |
@@ -40,7 +40,7 @@ The bundled AI model (`noise_filter/models/nfnet-*.onnx`) is trained on these pu
 | EARS (Meta / facebookresearch) | Clean speech | CC BY-NC 4.0 |
 | DEMAND (Thiemann, Ito, Vincent) | Noise | CC BY-SA 3.0 |
 | ESC-50 (Karol J. Piczak) | Noise | CC BY-NC 3.0 |
-| Noise samples shared by Noise Filter users | Noise | CC0 1.0 |
+| Noise samples shared by Tapis users | Noise | CC0 1.0 |
 
 Because of the non-commercial (NC) licenses, the model files are for **non-commercial use only**
 (education, research, personal use). For a commercial product, retrain the model on commercially licensed

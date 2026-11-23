@@ -7,7 +7,8 @@ import os
 import sys
 
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-VALUE = "NoiseFilter"
+VALUE = "Tapis"
+LEGACY_VALUE = "NoiseFilter"     # name used before the app was renamed to Tapis (0.11.0)
 
 
 def supported() -> bool:
@@ -16,7 +17,7 @@ def supported() -> bool:
 
 def command() -> str:
     """Command line Windows runs at sign-in: open hidden in the tray."""
-    if getattr(sys, "frozen", False):                      # installed NoiseFilter.exe
+    if getattr(sys, "frozen", False):                      # installed Tapis.exe
         return f'"{sys.executable}" ui --minimized'
     exe = sys.executable
     w = os.path.join(os.path.dirname(exe), "pythonw.exe")   # no console window
@@ -28,16 +29,18 @@ def _winreg():
     return winreg
 
 
-def is_enabled() -> bool:
-    if not supported():
-        return False
+def _has(name: str) -> bool:
     reg = _winreg()
     try:
         with reg.OpenKey(reg.HKEY_CURRENT_USER, RUN_KEY) as k:
-            reg.QueryValueEx(k, VALUE)
+            reg.QueryValueEx(k, name)
         return True
     except OSError:
         return False
+
+
+def is_enabled() -> bool:
+    return supported() and (_has(VALUE) or _has(LEGACY_VALUE))
 
 
 def set_enabled(on: bool) -> None:
@@ -47,15 +50,17 @@ def set_enabled(on: bool) -> None:
     with reg.CreateKeyEx(reg.HKEY_CURRENT_USER, RUN_KEY, 0, reg.KEY_SET_VALUE) as k:
         if on:
             reg.SetValueEx(k, VALUE, 0, reg.REG_SZ, command())
-        else:
+        names = (LEGACY_VALUE,) if on else (VALUE, LEGACY_VALUE)
+        for name in names:
             try:
-                reg.DeleteValue(k, VALUE)
+                reg.DeleteValue(k, name)
             except FileNotFoundError:
                 pass
 
 
 def refresh() -> None:
-    """Keep the path current when the app was reinstalled elsewhere or updated."""
+    """Keep the path current when the app was reinstalled elsewhere or updated, and move an
+    entry written by an older "Noise Filter" version to the new name."""
     if is_enabled():
         try:
             set_enabled(True)

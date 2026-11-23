@@ -6,7 +6,7 @@ export const REVIEW_PAGE = String.raw`<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Review sampel noise · Noise Filter</title>
+<title>Review sampel noise · Tapis</title>
 <link rel="icon" href="/review/logo.png">
 <style>
 :root {
@@ -132,7 +132,7 @@ dt { color:var(--mute) } dd { margin:0; overflow:hidden; text-overflow:ellipsis;
 <div id="login" hidden>
   <form class="login-card" id="loginf">
     <img src="/review/logo.png" alt="">
-    <h1>Noise Filter</h1>
+    <h1>Tapis</h1>
     <p>Review sampel noise</p>
     <div class="field">
       <input id="pw" type="password" autocomplete="current-password" placeholder="Password" required>
@@ -147,7 +147,7 @@ dt { color:var(--mute) } dd { margin:0; overflow:hidden; text-overflow:ellipsis;
 <div id="app" hidden>
   <header class="top">
     <img src="/review/logo.png" alt="">
-    <div class="brand"><b>Noise Filter</b><span>Review sampel</span></div>
+    <div class="brand"><b>Tapis</b><span>Review sampel</span></div>
     <div class="grow"></div>
     <button class="btn ghost icon-btn" id="logout" title="Keluar" aria-label="Keluar"><svg><use href="#i-out"/></svg></button>
   </header>

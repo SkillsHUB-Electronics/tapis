@@ -53,7 +53,7 @@ def test_mcp_protocol(monkeypatch):
 
 
 def test_control_running_window(tmp_path, monkeypatch):
-    """A real window with its control server, driven from another thread like nfctl would."""
+    """A real window with its control server, driven from another thread like tapisctl would."""
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     pytest.importorskip("PySide6")
     pytest.importorskip("pyqtgraph")
@@ -84,7 +84,7 @@ def test_control_running_window(tmp_path, monkeypatch):
         return box["r"]
 
     try:
-        assert call("ping")["app"] == "Noise Filter"
+        assert call("ping")["app"] == "Tapis"
         st = call("status")
         assert st["running"] is False and st["demo"] is True and "strength" in st["settings"]
         s = call("set", strength=1.3, highpass_hz=0, gate_enabled="off", comp_ratio=4.5, limiter_ceiling_db=-2.5)
