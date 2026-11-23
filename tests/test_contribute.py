@@ -47,7 +47,7 @@ def test_prepare_trims_and_drops_gappy_recordings(monkeypatch):
     x = fan()
     y = contribute.prepare(x)
     assert len(y) == len(x) - int(contribute.TRIM_START * SR)
-    assert contribute.prepare(x, dropped=2) is None
+    assert contribute.prepare(x, dropped=contribute.MAX_DROPPED_FRAMES + 1) is None
 
 
 def test_prepare_with_reason(monkeypatch):
@@ -55,8 +55,11 @@ def test_prepare_with_reason(monkeypatch):
     long = np.tile(fan(), 4)                                    # 12 s
     x, why = contribute.prepare_with_reason(long)
     assert why == "ok" and len(x) == contribute.RECORD_SECONDS * SR
-    assert contribute.prepare_with_reason(long, dropped=1) == (None, "gaps")
+    assert contribute.prepare_with_reason(long, dropped=contribute.MAX_DROPPED_FRAMES + 1) == (None, "gaps")
     assert contribute.prepare_with_reason(np.tile(fan() + voice(), 4))[1] == "speech"
+    x, why = contribute.prepare_with_reason(long, dropped=2)      # a busy PC dropped two 10 ms frames: fine
+    assert why == "ok"
+    assert contribute.prepare_with_reason(np.zeros(11 * SR, np.float32)) == (None, "mic_silent")
 
 
 def test_encode_wav():
@@ -200,3 +203,43 @@ def test_file_clips_spread_and_screen(monkeypatch):
     talk = np.tile(fan() + voice(), 10)                         # voice everywhere: nothing is kept
     clips, dropped = contribute.file_clips(talk)
     assert clips == [] and dropped == {"speech": 3}
+
+
+def test_upload_errors_are_explained(tmp_path, monkeypatch):
+    """Errors reach the UI as net.NetError with a reason (rejected, rate_limited...) and the server's message."""
+    from noise_filter import net
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    monkeypatch.setattr(net.time, "sleep", lambda s: None)
+    answers = [(400, {"ok": False, "error": "need 2-10 seconds"}), (429, {"ok": False, "error": "slow down"}),
+               (429, {"ok": False, "error": "slow down"}), (201, {"ok": True, "id": "x"}),
+               (503, {"ok": False}), (503, {"ok": False}), (503, {"ok": False})]
+
+    class H(BaseHTTPRequestHandler):
+        def log_message(self, *a): pass
+
+        def do_POST(self):
+            self.rfile.read(int(self.headers["Content-Length"]))
+            code, obj = answers.pop(0)
+            b = json.dumps(obj).encode()
+            self.send_response(code); self.send_header("Content-Length", str(len(b))); self.end_headers()
+            self.wfile.write(b)
+
+    srv = HTTPServer(("127.0.0.1", 0), H)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    monkeypatch.setattr(contribute, "SAMPLES_URL", f"http://127.0.0.1:{srv.server_port}")
+    monkeypatch.setattr(contribute, "enabled", lambda: True)
+    try:
+        with pytest.raises(net.NetError) as e:
+            contribute.upload(fan(), "fan_ac")
+        assert e.value.reason == "rejected" and "need 2-10 seconds" in str(e.value)
+        assert contribute.upload(fan(), "fan_ac") == "x"          # 429 twice, then accepted on retry
+        with pytest.raises(net.NetError) as e:
+            contribute.upload(fan(), "fan_ac")
+        assert e.value.reason == "server" and not answers
+    finally:
+        srv.shutdown()
+
+    monkeypatch.setattr(contribute, "SAMPLES_URL", "http://127.0.0.1:9")      # nothing listens there
+    with pytest.raises(net.NetError) as e:
+        contribute.upload(fan(), "fan_ac", timeout=2)
+    assert e.value.reason in ("offline", "blocked", "timeout")

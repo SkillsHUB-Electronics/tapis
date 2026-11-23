@@ -201,12 +201,46 @@ WAVEFORMATEXTENSIBLE make_format(int channels, SampleType t) {
   return f;
 }
 
+// Copy a device mix format into a WAVEFORMATEXTENSIBLE (plain WAVEFORMATEX tags are converted).
+bool to_extensible(const WAVEFORMATEX* w, WAVEFORMATEXTENSIBLE& f) {
+  if (!w) return false;
+  if (w->wFormatTag == WAVE_FORMAT_EXTENSIBLE && w->cbSize >= sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX)) {
+    std::memcpy(&f, w, sizeof(WAVEFORMATEXTENSIBLE));
+    return true;
+  }
+  if (w->wFormatTag != 1 /* PCM */ && w->wFormatTag != 3 /* IEEE float */) return false;
+  f = WAVEFORMATEXTENSIBLE{};
+  f.Format = *w;
+  f.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+  f.Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
+  f.Samples.wValidBitsPerSample = w->wBitsPerSample;
+  f.dwChannelMask = w->nChannels == 1 ? SPEAKER_FRONT_CENTER : w->nChannels == 2 ? (SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT) : 0;
+  f.SubFormat = w->wFormatTag == 3 ? kSubtypeFloat : kSubtypePcm;
+  return true;
+}
+
+// Errors that no other format can fix: report them as they are.
+bool is_final_error(HRESULT hr) {
+  return hr == E_ACCESSDENIED || hr == AUDCLNT_E_DEVICE_IN_USE || hr == AUDCLNT_E_DEVICE_INVALIDATED ||
+         hr == AUDCLNT_E_SERVICE_NOT_RUNNING;
+}
+
+std::string open_endpoint_impl(Endpoint& ep, IMMDeviceEnumerator* en, const std::wstring& id, bool capture,
+                               bool exclusive);
+
+// Error messages start with "input: " or "output: " so the app can tell which device failed.
 std::string open_endpoint(Endpoint& ep, IMMDeviceEnumerator* en, const std::wstring& id, bool capture,
                           bool exclusive) {
+  std::string e = open_endpoint_impl(ep, en, id, capture, exclusive);
+  return e.empty() ? e : (capture ? "input: " : "output: ") + e;
+}
+
+std::string open_endpoint_impl(Endpoint& ep, IMMDeviceEnumerator* en, const std::wstring& id, bool capture,
+                               bool exclusive) {
   HRESULT hr;
   EDataFlow flow = capture ? eCapture : eRender;
   hr = id.empty() ? en->GetDefaultAudioEndpoint(flow, eConsole, &ep.dev) : en->GetDevice(id.c_str(), &ep.dev);
-  if (FAILED(hr)) return hr_msg(capture ? "open input device" : "open output device", hr);
+  if (FAILED(hr)) return hr_msg("open device", hr);
   ep.exclusive = exclusive;
   ep.event = CreateEventW(nullptr, FALSE, FALSE, nullptr);
 
@@ -223,6 +257,24 @@ std::string open_endpoint(Endpoint& ep, IMMDeviceEnumerator* en, const std::wstr
                   AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY;
     hr = ep.client->Initialize(AUDCLNT_SHAREMODE_SHARED, flags, 0, 0,
                                reinterpret_cast<WAVEFORMATEX*>(&ep.fmt), nullptr);
+    if (FAILED(hr) && !is_final_error(hr)) {
+      // Some laptop drivers (array microphones with audio effects) refuse a mono stream or the
+      // converter. Try the device's own channel count at 48 kHz, then its exact mix format.
+      WAVEFORMATEX* mix = nullptr;
+      if (SUCCEEDED(ep.client->GetMixFormat(&mix)) && mix) {
+        HRESULT hr2 = activate();
+        if (SUCCEEDED(hr2)) {
+          ep.fmt = make_format(mix->nChannels, SampleType::F32);
+          hr2 = ep.client->Initialize(AUDCLNT_SHAREMODE_SHARED, flags, 0, 0,
+                                      reinterpret_cast<WAVEFORMATEX*>(&ep.fmt), nullptr);
+        }
+        if (FAILED(hr2) && mix->nSamplesPerSec == kRate && to_extensible(mix, ep.fmt) && SUCCEEDED(activate()))
+          hr2 = ep.client->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK, 0, 0,
+                                      reinterpret_cast<WAVEFORMATEX*>(&ep.fmt), nullptr);
+        CoTaskMemFree(mix);
+        if (SUCCEEDED(hr2)) hr = hr2;
+      }
+    }
     if (FAILED(hr)) return hr_msg("IAudioClient::Initialize (shared)", hr);
   } else {
     // Exclusive mode: pick a 48 kHz format the hardware accepts.
@@ -317,7 +369,8 @@ void nf_engine::run(HANDLE ready, std::string* err) {
   IMMDeviceEnumerator* en = make_enumerator();
   if (!en) *err = "cannot create device enumerator";
   if (err->empty()) *err = open_endpoint(in, en, in_id, true, exclusive);
-  if (err->empty()) *err = open_endpoint(out, en, out_id, false, exclusive);
+  const bool no_out = out_id == L"nf:none";  // record only (e.g. "Record noise" while the filter is off)
+  if (err->empty() && !no_out) *err = open_endpoint(out, en, out_id, false, exclusive);
   release(en);
 
   Fifo infifo, outfifo;
@@ -329,13 +382,13 @@ void nf_engine::run(HANDLE ready, std::string* err) {
   if (err->empty()) {
     // Prime the render buffer with silence, then start both streams.
     BYTE* data = nullptr;
-    if (SUCCEEDED(out.ren->GetBuffer(out.buffer_frames, &data)))
+    if (!no_out && SUCCEEDED(out.ren->GetBuffer(out.buffer_frames, &data)))
       out.ren->ReleaseBuffer(out.buffer_frames, AUDCLNT_BUFFERFLAGS_SILENT);
     in.client->GetStreamLatency(&in_lat);
-    out.client->GetStreamLatency(&out_lat);
+    if (!no_out) out.client->GetStreamLatency(&out_lat);
     HRESULT hr = in.client->Start();
-    if (SUCCEEDED(hr)) hr = out.client->Start();
-    if (FAILED(hr)) *err = hr_msg("IAudioClient::Start", hr);
+    if (FAILED(hr)) *err = "input: " + hr_msg("IAudioClient::Start", hr);
+    if (SUCCEEDED(hr) && !no_out && FAILED(hr = out.client->Start())) *err = "output: " + hr_msg("IAudioClient::Start", hr);
   }
   const bool ok = err->empty();
   running = ok;
@@ -352,7 +405,7 @@ void nf_engine::run(HANDLE ready, std::string* err) {
   HANDLE waits[3] = {stop_event, in.event, out.event};
 
   for (;;) {
-    DWORD w = WaitForMultipleObjects(3, waits, FALSE, 500);
+    DWORD w = WaitForMultipleObjects(no_out ? 2 : 3, waits, FALSE, 500);
     if (w == WAIT_OBJECT_0) break;
     if (w == WAIT_TIMEOUT) {  // device stalled or unplugged
       xruns++;
@@ -392,9 +445,10 @@ void nf_engine::run(HANDLE ready, std::string* err) {
         dsp_avg_us = static_cast<float>(avg);
         dsp_max_us = static_cast<float>(mx);
         frames++;
-        outfifo.push(frame_out.data(), kFrame);
+        if (!no_out) outfifo.push(frame_out.data(), kFrame);
       }
-      if (outfifo.size() > high + out.buffer_frames) {
+      if (no_out) latency_ms = static_cast<float>(in_lat / 10000.0);
+      if (!no_out && outfifo.size() > high + out.buffer_frames) {
         outfifo.drop(outfifo.size() - target);
         xruns++;
       }

@@ -7,6 +7,23 @@ All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-23
+
+### Fixed
+- **Microphone blocked by Windows.** When Start cannot open the microphone, Tapis now explains
+  the cause (Windows privacy switch "Let desktop apps access your microphone", antivirus, mute
+  key, device in use by another app, device unplugged) with a button that opens the right Settings
+  page. A microphone that only delivers silence (muted or blocked) is detected after a few seconds.
+- Laptop microphones that refuse a mono 48 kHz stream (array microphones with audio effects) now
+  open in their own channel layout. If exclusive mode fails, the filter falls back to shared mode.
+- **Record noise** opens only the microphone, so it works without VB-CABLE and while the output
+  device is busy. Start is disabled during the recording. A few dropped 10 ms frames on a busy PC
+  no longer throw the recording away.
+- **Sending noise samples.** HTTPS is now verified through Windows itself (with Mozilla's roots as
+  a fallback), which fixes certificate errors on PCs whose root store is incomplete. Slow or
+  dropped connections are retried, and a failure says why (no internet, network filter, too many
+  samples, server message) instead of a raw error.
+
 ## [0.11.0] - 2026-11-23
 
 ### Changed
@@ -126,7 +143,8 @@ All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here
 - Offline Windows installer with VB-CABLE bundled.
 - App icon.
 
-[Unreleased]: https://github.com/SkillsHUB-Electronics/tapis/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/SkillsHUB-Electronics/tapis/compare/v0.11.1...HEAD
+[0.11.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.1
 [0.11.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.0
 [0.10.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.10.0
 [0.9.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.9.0

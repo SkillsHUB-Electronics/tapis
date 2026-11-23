@@ -17,3 +17,7 @@ Key facts that are easy to miss:
 - User data from the old name is moved by `noise_filter/paths.py`; the "Start with Windows" entry by
   `noise_filter/ui/autostart.py` and the installer.
 - Default branch: `ccr-b550d426-d4tmx2`. Releases are published by the maintainer.
+- v0.11.1 (2026-11-23): microphone/network errors are explained to the user. Audio errors go through
+  `noise_filter/audio/errors.py` + `noise_filter/ui/mic_help.py`, HTTPS through `noise_filter/net.py`
+  (Windows trust store). "Record noise" opens only the microphone (`nf:none` output). The sample
+  Worker was verified working from Windows runners; failed uploads come from users' PCs or networks.

@@ -99,14 +99,14 @@ class ContributeDialog(W.QDialog):
 
 class UploadWorker(QtCore.QObject):
     """Runs upload / delete off the UI thread; `done(ok, message)` arrives on the UI thread."""
-    done = QtCore.Signal(bool, str)
+    done = QtCore.Signal(bool, str, str)     # ok, result or error detail, error reason (net.REASONS)
 
     def run(self, fn, *args):
         import threading
 
         def work():
             try:
-                self.done.emit(True, str(fn(*args)))
+                self.done.emit(True, str(fn(*args)), "")
             except Exception as e:  # offline, service down, rejected
-                self.done.emit(False, str(e))
+                self.done.emit(False, str(e), getattr(e, "reason", ""))
         threading.Thread(target=work, daemon=True, name="contribute").start()

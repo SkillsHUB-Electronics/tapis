@@ -16,6 +16,34 @@ VB-CABLE is not installed. Run the Tapis installer again (it installs VB-CABLE w
 missing) and restart Windows if the installer asks. When running from source, install VB-CABLE from
 [vb-cable.com](https://www.vb-cable.com).
 
+## Start does not work: the microphone is blocked
+
+Tapis now says why and offers a button to the right Windows page. The usual causes:
+
+1. **Windows privacy.** Settings › Privacy & security › Microphone has three switches:
+   *Microphone access*, *Let apps access your microphone* and, further down,
+   *Let desktop apps access your microphone*. Tapis is a desktop app, so it never appears in the
+   list of apps on that page: only the last switch counts for it.
+2. **Mute key or the laptop maker's app.** Many laptops have a microphone key (often F4 or F8,
+   with a light) or a privacy switch in Lenovo Vantage, HP or Dell software. Windows then sends
+   only silence, and Tapis warns that the microphone "only sends silence".
+3. **Antivirus microphone protection** (Kaspersky, ESET, Bitdefender, Norton…) or a policy on a
+   school or office PC. Allow Tapis there.
+4. **Another app holds the microphone exclusively.** Close it, or turn off *Allow applications to
+   take exclusive control of this device* in the microphone's properties (Sound settings › More
+   sound settings › Recording › Properties › Advanced).
+
+If *Exclusive mode* is ticked in Tapis and the device refuses it, Tapis falls back to shared mode
+by itself.
+
+## "Record noise" or sending a sample fails
+
+- **Record noise** only needs the microphone (not VB-CABLE). If it says the microphone only sent
+  silence, see the section above.
+- When sending fails, the message says why: no internet, a slow connection, or a **school or
+  office network that blocks the sample server**. In that case try another network, for example a
+  phone hotspot. "Show Details" in the message has the technical reason for a bug report.
+
 ## The sound crackles or drops out
 
 - Look at **xruns** in the status bar. If the number keeps climbing, the audio is starved.
