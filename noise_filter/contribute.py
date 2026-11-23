@@ -87,33 +87,48 @@ def voiced_frames(x: np.ndarray, frame: int = 1920) -> tuple[np.ndarray, np.ndar
     return np.array(per), np.array(pitch), np.array(energy)
 
 
-def looks_like_speech(x: np.ndarray) -> bool:
-    """Conservative voice detector: when in doubt, say yes (the sample is then not offered).
+def looks_like_speech(x: np.ndarray, strict: bool = True) -> bool:
+    """Voice detector from pitch and loudness. When in doubt it says yes (the sample is then not offered).
 
-    Speech = voiced (periodic at 80-400 Hz) frames that either stand out from the background
-    (louder than the recording's typical level) or form a pitch track that moves, as speech
-    pitch does. A fan or mains hum is periodic too, but steady in level and pitch. Some
-    rumbly or babble-like noises are rejected too; losing those samples is the price of
-    never sending a voice."""
+    Speech is found in two ways:
+      - syllables: at least two short bursts (80-600 ms) of voiced sound that stand out from the
+        background (in strict mode one burst of any length is enough);
+      - intonation: a pitch track that keeps moving from one 40 ms frame to the next, as speech and
+        singing do.
+    Machine noise is periodic too (fan blade tone, compressor, a passing engine), but its pitch drifts
+    slowly and its loud parts are long and steady, so it is no longer mistaken for a voice.
+
+    strict=True (used when the AI model's second opinion is not available) also rejects any voiced
+    recording whose pitch spreads by more than ~4 %, the older and much more cautious rule."""
     per, pitch, energy = voiced_frames(x)
     if len(per) == 0:
         return False
     voiced = per > 0.5
     loud = energy > np.median(energy) + 4.0
-    run = 0
-    for v in voiced & loud:                  # 2 frames = 80 ms of voice above the background
-        run = run + 1 if v else 0
-        if run >= 2:
-            return True
-    if voiced.mean() > 0.08:
-        p = pitch[voiced]
-        if np.std(np.log2(p)) > 0.05:        # pitch moving by more than ~4 %: intonation
-            return True
+    bursts, run = 0, 0
+    for v in list(voiced & loud) + [False]:
+        if v:
+            run += 1
+            continue
+        if 2 <= run <= 15:                   # 80-600 ms: syllable-sized
+            bursts += 1
+        elif strict and run > 15:
+            bursts += 1
+        run = 0
+    if bursts >= (1 if strict else 2):
+        return True
+    lp = np.log2(np.maximum(pitch, 1.0))
+    steps = np.abs(np.diff(lp))[(per[1:] > 0.6) & (per[:-1] > 0.6)]
+    steps = steps[steps < 0.25]               # octave jumps are pitch-tracker errors, not movement
+    if voiced.mean() > 0.15 and len(steps) >= 10 and np.mean(steps > 0.008) > 0.85:
+        return True                           # moves by more than 0.5 % almost every 40 ms
+    if strict and voiced.mean() > 0.08 and np.std(np.log2(pitch[voiced])) > 0.05:
+        return True
     return False
 
 
 def model_keeps_voice(x: np.ndarray, model_path: str | None = None, window: float = 0.2,
-                      threshold_db: float = -12.0) -> bool | None:
+                      threshold_db: float = -12.0, min_windows: int = 1) -> bool | None:
     """Second opinion from the AI denoiser: it is trained to keep speech and remove noise, so
     if any 200 ms window keeps much of its energy after denoising, something voice-like is there.
     None when no model / engine is available."""
@@ -139,7 +154,7 @@ def model_keeps_voice(x: np.ndarray, model_path: str | None = None, window: floa
     if len(ex) == 0:
         return None
     ratio = 10 * np.log10((ey ** 2).mean(1) + 1e-12) - 10 * np.log10((ex ** 2).mean(1) + 1e-12)
-    return bool(np.max(ratio) > threshold_db)
+    return bool(np.sum(ratio > threshold_db) >= min_windows)
 
 
 def check_sample(x: np.ndarray, model_path: str | None = None) -> tuple[bool, str]:
@@ -152,11 +167,13 @@ def check_sample(x: np.ndarray, model_path: str | None = None) -> tuple[bool, st
     rms = float(np.sqrt(np.mean(x.astype(np.float64) ** 2)))
     if 20 * np.log10(rms + 1e-12) < -70:
         return False, "silent"
-    if looks_like_speech(x) or model_keeps_voice(x, model_path):
+    model = model_keeps_voice(x, model_path)
+    if model or looks_like_speech(x, strict=model is None):
         return False, "speech"
     return True, "ok"
 
 
+SALVAGE_SECONDS = 4.0      # a rejected recording is split in two halves of at least this length
 MAX_DROPPED_FRAMES = 5     # a few missing 10 ms frames (busy PC) do not spoil a noise recording
 
 
@@ -171,7 +188,16 @@ def prepare_with_reason(raw: np.ndarray, dropped: int = 0,
     if len(x) >= MIN_SECONDS * SR and not np.any(x):
         return None, "mic_silent"
     ok, reason = check_sample(x)
-    return (x, "ok") if ok else (None, reason)
+    if ok:
+        return x, "ok"
+    if reason == "speech" and len(x) >= 2 * SALVAGE_SECONDS * SR:
+        # Something voice-like in one part only (a word from the corridor, a door): offer the half
+        # that is clean. It goes through every check again on its own.
+        h = len(x) // 2
+        for part in (x[:h], x[h:]):
+            if check_sample(part)[0]:
+                return part, "ok"
+    return None, reason
 
 
 def prepare(raw: np.ndarray, dropped: int = 0) -> np.ndarray | None:
