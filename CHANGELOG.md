@@ -16,6 +16,9 @@ All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here
   Re-run `tapisctl mcp-config` and paste the new entry into your AI app.
 - The repository moved to [github.com/SkillsHUB-Electronics/tapis](https://github.com/SkillsHUB-Electronics/tapis);
   old links redirect.
+- `CLAUDE.md` added: a short guide for AI agents on other devices (new names, what kept the old name).
+- CI downloads ONNX Runtime with `tools/ci/get_onnxruntime.py`, which falls back to the official NuGet
+  package when the GitHub release download fails.
 
 ### Updating from Noise Filter
 - Run the new setup: it replaces the old installation, moves it to `C:\Program Files\Tapis`,

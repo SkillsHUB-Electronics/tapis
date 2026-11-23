@@ -1,6 +1,6 @@
 # Instructions for AI agents
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md) first. The
+See also [CLAUDE.md](CLAUDE.md) for the rename to Tapis. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md) first. The
 rules there apply to agents too. The points that are easy to miss:
 
 - **Default branch** is `ccr-b550d426-d4tmx2`. Work on a feature branch and open a pull request.
