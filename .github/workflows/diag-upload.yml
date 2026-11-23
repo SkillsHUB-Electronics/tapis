@@ -1,0 +1,31 @@
+name: diag-upload
+on: push
+jobs:
+  diag:
+    strategy: { fail-fast: false, matrix: { os: [windows-latest, ubuntu-latest] } }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install numpy
+      - shell: python
+        run: |
+          import ssl, json, uuid, urllib.request, urllib.error, numpy as np, traceback
+          import noise_filter.contribute as c
+          print("ssl", ssl.OPENSSL_VERSION, ssl.get_default_verify_paths())
+          x = (0.01*np.random.default_rng(0).standard_normal(48000*3)).astype(np.float32)
+          iid = str(uuid.uuid4())
+          c.install_id = lambda: iid
+          c.save_state = lambda **k: {}
+          c.load_state = lambda: {}
+          try:
+              print("upload id", c.upload(x, "other"))
+          except urllib.error.HTTPError as e:
+              print("HTTPError", e.code, e.read()[:300])
+          except Exception:
+              traceback.print_exc()
+          try:
+              print("deleted", c.delete_my_samples())
+          except Exception:
+              traceback.print_exc()
