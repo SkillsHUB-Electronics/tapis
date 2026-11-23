@@ -243,3 +243,44 @@ def test_upload_errors_are_explained(tmp_path, monkeypatch):
     with pytest.raises(net.NetError) as e:
         contribute.upload(fan(), "fan_ac", timeout=2)
     assert e.value.reason in ("offline", "blocked", "timeout")
+
+
+def _pink(n, seed=3):
+    r = np.random.default_rng(seed)
+    X = np.fft.rfft(r.standard_normal(n))
+    f = np.fft.rfftfreq(n, 1 / SR)
+    X[1:] /= np.sqrt(f[1:]); X[0] = 0
+    y = np.fft.irfft(X, n)
+    return y / np.std(y)
+
+
+def test_machine_noise_is_not_mistaken_for_voice(monkeypatch):
+    """Fans, compressors and passing engines are periodic too; with the AI model's opinion
+    available they must not be refused as "speech" (reported by users in v0.11.1)."""
+    monkeypatch.setattr(contribute, "model_keeps_voice", lambda x, p=None: False)
+    n = SR * 10
+    tt = np.arange(n) / SR
+    fan_tone = 0.5 * _pink(n) + 0.3 * np.sin(2 * np.pi * (150 + 3 * np.sin(2 * np.pi * 0.2 * tt)) * tt)
+    f = 90 * (1 + 0.1 * np.tanh((tt - 5) / 1.5))
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    car = _pink(n) + 3 * np.exp(-((tt - 5) / 2) ** 2) * sum(np.sin(k * ph) / k for k in range(1, 6))
+    fridge = 0.4 * _pink(n) + np.sin(2 * np.pi * (100 + 20 * np.sin(2 * np.pi * 0.05 * tt)) * tt) * (tt > 4)
+    for x in (fan_tone, car, fridge):
+        x = (x / np.sqrt(np.mean(x ** 2)) * 0.01).astype(np.float32)
+        assert contribute.check_sample(x) == (True, "ok")
+    # the same voice as above is still found by pitch and syllables alone
+    assert contribute.check_sample(fan() + voice())[1] == "speech"
+    assert contribute.check_sample(fan() + 0.2 * voice())[1] == "speech"   # voice below the fan's level
+
+
+def test_clean_half_of_a_recording_is_offered(monkeypatch):
+    monkeypatch.setattr(contribute, "model_keeps_voice", lambda x, p=None: False)
+    room = np.tile(fan(), 4)[:int(10.25 * SR)]
+    talk = room.copy()
+    talk[int(7 * SR):int(7 * SR) + len(t)] += voice()          # a few words at the end
+    x, why = contribute.prepare_with_reason(talk)
+    assert why == "ok" and len(x) == 5 * SR
+    both = room.copy()
+    both[int(1 * SR):int(1 * SR) + len(t)] += voice()
+    both[int(7 * SR):int(7 * SR) + len(t)] += voice()
+    assert contribute.prepare_with_reason(both) == (None, "speech")

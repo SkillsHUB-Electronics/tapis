@@ -21,3 +21,6 @@ Key facts that are easy to miss:
   `noise_filter/audio/errors.py` + `noise_filter/ui/mic_help.py`, HTTPS through `noise_filter/net.py`
   (Windows trust store). "Record noise" opens only the microphone (`nf:none` output). The sample
   Worker was verified working from Windows runners; failed uploads come from users' PCs or networks.
+- v0.11.2 (2026-11-23): voice check (`contribute.looks_like_speech`) is lenient on machine tones when
+  the AI model's opinion is available (`strict=False`) and strict without it; Record noise offers the
+  clean half when only one half has a voice. CI screening uses the same check with the model.

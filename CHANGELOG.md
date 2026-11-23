@@ -7,6 +7,16 @@ All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-11-23
+
+### Fixed
+- **Room noise refused as "contains voices or music".** The on-PC voice check mistook machine noise
+  with a tone (fan blades, air conditioner, fridge compressor, a passing engine) for a voice. When the
+  AI model's second opinion is available (always in the installed app), the pitch check now looks for
+  syllables and fast intonation instead of any slow pitch drift. Voices are still refused.
+- If a voice is heard in only one half of a **Record noise** recording, the clean half (5 s) is offered
+  instead of throwing everything away.
+
 ## [0.11.1] - 2026-11-23
 
 ### Fixed
@@ -143,7 +153,8 @@ All notable changes to Tapis (called Noise Filter before 0.11.0) are listed here
 - Offline Windows installer with VB-CABLE bundled.
 - App icon.
 
-[Unreleased]: https://github.com/SkillsHUB-Electronics/tapis/compare/v0.11.1...HEAD
+[Unreleased]: https://github.com/SkillsHUB-Electronics/tapis/compare/v0.11.2...HEAD
+[0.11.2]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.2
 [0.11.1]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.1
 [0.11.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.11.0
 [0.10.0]: https://github.com/SkillsHUB-Electronics/tapis/releases/tag/v0.10.0
